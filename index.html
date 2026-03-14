@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>النظام المحاسبي المتكامل - الإصدار النهائي</title>
+    <title>مساعد تصفية العملاء من برنامج المحصل</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f9; padding: 20px; }
@@ -27,12 +27,34 @@
         
         .total-row { background-color: #f1c40f !important; font-weight: bold; color: #2c3e50; }
         .final-result-box { background-color: #2c3e50 !important; color: #ffffff !important; font-size: 14px; }
+        
+        /* تنسيق التنبيه والتوقيع */
+        .disclaimer {
+            text-align: center;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px dashed #e74c3c;
+            border-radius: 8px;
+            background-color: #fff5f5;
+        }
+        .footer-credit { 
+            text-align: center; 
+            margin-top: 20px; 
+            font-size: 13px; 
+            color: #7f8c8d; 
+            border-top: 1px solid #eee; 
+            padding-top: 15px;
+        }
+        .footer-credit span { color: #3498db; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>نظام إدارة الأقساط والتصفية (حسابات دقيقة + إجماليات)</h2>
+    <h2>مساعد تصفية العملاء من برنامج المحصل</h2>
     <div class="date-info" id="currentDateDisplay"></div>
     
     <textarea id="dataInput" placeholder="قم بلصق البيانات هنا..."></textarea>
@@ -43,6 +65,14 @@
     </div>
 
     <div id="tableOutput" class="table-container"></div>
+
+    <div class="disclaimer">
+        ⚠️ النظام تحت الاختبار والتعديل.. يرجى المراجعة على النتائج جيداً.
+    </div>
+
+    <div class="footer-credit">
+        Powered by <span>Loans & Economic Empowerment IT Group</span>
+    </div>
 </div>
 
 <script>
@@ -101,14 +131,17 @@ function processAll() {
                 <th class="col-tasfeya">الرصيد (F)</th>
                 <th class="col-tasfeya">عمولة 5% (G)</th>
                 <th class="col-tasfeya">المطلوب (H)</th>
-                <th class="col-tasfeya">الصافي (I)</th>
+                <th class="col-tasfeya">الصافي شامل تراكم الغرامات (I)</th>
             </tr>
         </thead>
         <tbody>`;
 
-    let lastNetSettlement = 0;
+    let firstEligibleSettlement = null;
+    let accumulatedPenalties = 0;
 
     rowsData.forEach((row, index) => {
+        accumulatedPenalties += row.penalty;
+
         let isSameMonth = (row.jsDate.getFullYear() === today.getFullYear() && row.jsDate.getMonth() === today.getMonth());
         let isFutureMonth = (row.jsDate > today && !isSameMonth);
         
@@ -128,20 +161,22 @@ function processAll() {
             }
             for(let j = 0; j < index; j++) {
                 if (rowsData[j].paid < rowsData[j].totalDue) {
-                    F += (rowsData[j].totalDue - rowsData[j].paid + rowsData[j].penalty);
+                    F += (rowsData[j].totalDue - rowsData[j].paid);
                 }
             }
+
             let G = Math.round(sumPrincipalFuture * 0.05);
             let H = Math.round(F + G);
-            let I = Math.round(H - row.paid + row.penalty);
+            let I = Math.round(H - row.paid + accumulatedPenalties);
 
             F_txt = Math.round(F).toLocaleString();
             G_txt = G.toLocaleString();
             H_txt = H.toLocaleString();
             I_txt = I.toLocaleString();
             
-            // تخزين آخر صافي تصفية محسوب لاستخدامه في الإجمالي
-            lastNetSettlement = I;
+            if (firstEligibleSettlement === null) {
+                firstEligibleSettlement = I;
+            }
         }
 
         tableHtml += `<tr>
@@ -157,7 +192,6 @@ function processAll() {
         </tr>`;
     });
 
-    // سطر الإجماليات النهائي
     tableHtml += `
         <tr class="total-row">
             <td colspan="2">إجمالي المسحوبات</td>
@@ -174,10 +208,10 @@ function processAll() {
         </tr>
         <tr class="final-result-box">
             <td colspan="9" style="text-align:right; border:none; padding-right:30px;">
-                صافي المبلغ المطلوب لتصفية القرض بالكامل (شامل عمولة الـ 5% والغرامات):
+                صافي المبلغ المطلوب لتصفية القرض بالكامل (استحقاق حالي + أصول مستقبلية + 5% + إجمالي الغرامات):
             </td>
             <td colspan="5" style="font-size:18px; color:#f1c40f; border:none;">
-                ${lastNetSettlement > 0 ? lastNetSettlement.toLocaleString() + " جنيه مصري" : "لا توجد تصفية متاحة"}
+                ${firstEligibleSettlement !== null ? firstEligibleSettlement.toLocaleString() + " جنيه مصري" : "لا توجد تصفية متاحة"}
             </td>
         </tr>
     </tbody></table>`;
