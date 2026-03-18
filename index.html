@@ -7,71 +7,36 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; }
-
         .container { max-width: 1800px; margin: auto; background: white; padding: 25px; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-
         h2 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; font-size: 22px; margin-bottom: 8px; }
         .date-info { text-align: center; margin-bottom: 15px; color: #2980b9; font-weight: bold; font-size: 14px; }
-
         textarea { width: 100%; height: 130px; padding: 12px; border: 2px solid #dfe6e9; border-radius: 8px; margin-bottom: 15px; outline: none; font-size: 13px; resize: vertical; transition: border 0.3s; }
         textarea:focus { border-color: #3498db; }
-
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         button { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.25s; }
         button:hover { opacity: 0.88; transform: translateY(-1px); }
         .btn-process { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
         .btn-excel   { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; }
         .btn-clear   { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
-
-        /* جدول */
         .table-container { overflow-x: auto; margin-top: 20px; max-height: 640px; border: 1px solid #ddd; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 1750px; }
         th, td { border: 1px solid #d1d8e0; padding: 9px 10px; text-align: center; font-size: 13px; }
         th { background: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; }
         th.orange-header { background: #e67e22 !important; }
         tbody tr:nth-child(even) td { background-color: #f8f9fa; }
-
-        /* عمود م */
         td.col-index { background: linear-gradient(135deg, #2c3e50, #34495e) !important; color: #f1c40f !important; font-weight: bold; font-size: 14px; min-width: 38px; }
-
-        /* ===== حالات السطر ===== */
-
-        /* سابق مسدد */
-        td.status-past { color: #636e72; background-color: #f5f6fa !important; }
-
-        /* متأخر = سابق غير مسدد */
+        td.status-past    { color: #636e72; background-color: #f5f6fa !important; }
         td.status-overdue { color: #922b21 !important; font-weight: bold; background-color: #fdecea !important; }
-
-        /* استحقاق الشهر الحالي */
         td.status-current { color: #d35400; font-weight: bold; background-color: #fff3e0 !important; border: 2px solid #e67e22 !important; }
-
-        /* مستقبلي */
-        td.status-future { color: #1565c0; font-weight: bold; background-color: #e8f0fe !important; }
-
-        /* غرامة */
+        td.status-future  { color: #1565c0; font-weight: bold; background-color: #e8f0fe !important; }
         .col-penalty { background-color: #fee2e2 !important; color: #b91c1c; font-weight: bold; }
-
-        /* أعمدة التصفية – ألوان حسب نوع السطر */
-        td.tsf-past     { background-color: #f5f6fa !important; color: #aaa; }
-        td.tsf-overdue  { background-color: #fdecea !important; font-weight: bold; color: #922b21; }
-        td.tsf-current  { background-color: #fff3e0 !important; font-weight: bold; color: #bf360c; }
-        td.tsf-future   { background-color: #e8f4fd !important; font-weight: bold; color: #1a5276; }
-
-        /* صف الإجمالي */
+        td.tsf-past    { background-color: #f5f6fa !important; color: #aaa; }
+        td.tsf-overdue { background-color: #fdecea !important; font-weight: bold; color: #922b21; }
+        td.tsf-current { background-color: #fff3e0 !important; font-weight: bold; color: #bf360c; }
+        td.tsf-future  { background-color: #e8f4fd !important; font-weight: bold; color: #1a5276; }
         .total-row td { background-color: #f39c12 !important; font-weight: bold; color: #2c3e50; }
-
-        /* صف تفسير الأرقام */
-        .breakdown-row td { background-color: #1a252f !important; color: #ecf0f1 !important; font-size: 13px; padding: 12px 10px; }
-        .breakdown-row td.val-cell { font-size: 16px; font-weight: bold; }
-        .breakdown-row td.val-cell.gold  { color: #f1c40f !important; }
-        .breakdown-row td.val-cell.red   { color: #ff6b6b !important; }
-        .breakdown-row td.val-cell.green { color: #2ecc71 !important; }
-
-        /* صف النتيجة النهائية */
-        .final-row td { background: #0d1b2a !important; color: white !important; font-size: 14px; padding: 14px 10px; }
+        .final-row td  { background: #0d1b2a !important; color: white !important; }
         .final-row td.final-val { font-size: 22px; font-weight: bold; color: #f1c40f !important; letter-spacing: 1px; }
-
-        /* بطاقات */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .stat-card { border-radius: 10px; padding: 14px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
         .stat-card .val { font-size: 18px; font-weight: bold; display: block; }
@@ -82,363 +47,287 @@
         .card-red    { background: #fdedec; color: #922b21; }
         .card-gold   { background: #fef3c7; color: #92400e; }
         .card-purple { background: #f5eef8; color: #6c3483; }
-
-        /* legend */
         .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; font-size: 12px; align-items: center; }
         .legend-item { display: flex; align-items: center; gap: 5px; }
         .legend-box { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
-
-        /* badges */
         .badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .badge-paid-early  { background:#d5f5e3; color:#1e8449; }
-        .badge-paid-late   { background:#fde8d8; color:#a04000; }
-        .badge-not-due     { background:#eaf2ff; color:#154360; }
-        .badge-overdue-st  { background:#fdedec; color:#922b21; }
-
+        .badge-paid-early { background:#d5f5e3; color:#1e8449; }
+        .badge-paid-late  { background:#fde8d8; color:#a04000; }
+        .badge-not-due    { background:#eaf2ff; color:#154360; }
         .disclaimer { text-align: center; color: #e74c3c; font-weight: bold; margin-top: 20px; font-size: 13px; padding: 10px; border: 1px dashed #e74c3c; border-radius: 8px; background-color: #fff5f5; }
         .footer-credit { text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; border-top: 1px solid #eee; padding-top: 12px; }
         .footer-credit span { color: #3498db; font-weight: bold; }
+        /* صف التفصيل */
+        .breakdown-inner { width:100%; border-collapse:collapse; color:#ecf0f1; background:#1a252f; }
+        .breakdown-inner td { border: none; padding: 12px 10px; text-align: center; }
+        .bd-label { font-size: 11px; margin-bottom: 5px; }
+        .bd-val   { font-size: 17px; font-weight: bold; }
+        .bd-sep   { font-size: 22px; color: #7f8c8d; }
+        .bd-total-cell { background: #0d1b2a !important; }
+        .bd-total-cell .bd-val { font-size: 22px; color: #f1c40f !important; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>🏦 مساعد تصفية العملاء من برنامج المحصل</h2>
+    <h2>&#x1F3E6; مساعد تصفية العملاء من برنامج المحصل</h2>
     <div class="date-info" id="currentDateDisplay"></div>
-
     <textarea id="dataInput" placeholder="قم بلصق بيانات الأقساط هنا (مباشرةً من برنامج المحصل)..."></textarea>
-
     <div class="btn-group">
-        <button class="btn-process" onclick="processAll()">📊 تحليل البيانات وعرض الإجماليات</button>
-        <button class="btn-excel"   onclick="exportToExcel()">📥 تصدير Excel</button>
-        <button class="btn-clear"   onclick="clearAll()">🗑️ مسح البيانات</button>
+        <button class="btn-process" onclick="processAll()">&#x1F4CA; تحليل البيانات وعرض الإجماليات</button>
+        <button class="btn-excel"   onclick="exportToExcel()">&#x1F4E5; تصدير Excel</button>
+        <button class="btn-clear"   onclick="clearAll()">&#x1F5D1;&#xFE0F; مسح البيانات</button>
     </div>
-
     <div id="statsArea"></div>
     <div id="tableOutput" class="table-container"></div>
-
-    <div class="disclaimer">⚠️ النظام تحت الاختبار والتعديل.. يرجى مراجعة النتائج بعناية قبل الاعتماد عليها.</div>
-    <div class="footer-credit">Powered by <span>Loans & Economic Empowerment IT Group</span></div>
+    <div class="disclaimer">&#x26A0;&#xFE0F; النظام تحت الاختبار والتعديل.. يرجى مراجعة النتائج بعناية قبل الاعتماد عليها.</div>
+    <div class="footer-credit">Powered by <span>Loans &amp; Economic Empowerment IT Group</span></div>
 </div>
-
 <script>
-// ============================================================
-//  التاريخ الحالي
-// ============================================================
-const today       = new Date();
-const todayYear   = today.getFullYear();
-const todayMonth  = today.getMonth();   // 0-based
-
+const today = new Date();
 document.getElementById('currentDateDisplay').innerText =
-    "📅 تاريخ التقرير: " + today.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    "تاريخ التقرير: " + today.toLocaleDateString('ar-EG', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
 
-// ============================================================
-//  تحليل سطر بيانات
-// ============================================================
+/* ===== تحليل سطر ===== */
 function parseLine(line) {
     if (!line.trim()) return null;
     const p = line.trim().split(/\s+/);
     if (p.length < 9) return null;
     if (!/^\d+$/.test(p[0])) return null;
     if (!/^\d{4}\/\d{2}\/\d{2}$/.test(p[1])) return null;
-
-    const dp       = p[1].split('/');
-    const instDate = new Date(+dp[0], +dp[1] - 1, +dp[2]);
-
+    const dp = p[1].split('/');
+    const jsDate = new Date(+dp[0], +dp[1]-1, +dp[2]);
     const principal = parseFloat(p[2].replace(/,/g,'')) || 0;
     const fees      = parseFloat(p[3].replace(/,/g,'')) || 0;
     const totalDue  = parseFloat(p[4].replace(/,/g,'')) || 0;
     const paid      = parseFloat(p[7].replace(/,/g,'')) || 0;
-    const delayDays = parseInt(p[p.length - 1])          || 0;
-
-    // غرامة: 1% من الإجمالي/يوم بحد أقصى المصاريف
-    const penaltyPerDay = delayDays > 0 ? totalDue * 0.01 : 0;
-    const penalty       = Math.min(penaltyPerDay * delayDays, fees);
-
-    return {
-        m: p[0], date: p[1], jsDate: instDate,
-        instYear:  instDate.getFullYear(),
-        instMonth: instDate.getMonth(),   // 0-based
-        principal, fees, totalDue, paid, delayDays, penalty,
-        statusTxt: p[8] || ''
-    };
+    const delayDays = parseInt(p[p.length-1]) || 0;
+    const penPerDay = delayDays > 0 ? totalDue * 0.01 : 0;
+    const penalty   = Math.min(penPerDay * delayDays, fees);
+    return { m:p[0], date:p[1], jsDate, principal, fees, totalDue, paid, delayDays, penalty, statusTxt:p[8]||'' };
 }
 
-// ============================================================
-//  تحديد نوع السطر بناءً على تاريخ القسط مقارنةً بتاريخ اليوم
-//  ─────────────────────────────────────────────────────────
-//  المنطق:
-//   • لو تاريخ القسط عدى (أقل من النهارده)         → PAST / OVERDUE
-//   • أول قسط تاريخه >= النهارده                   → CURRENT (الدور عليه)
-//   • كل الأقساط بعده                              → FUTURE
-//
-//  يعني: الاستحقاق الحالي = أول قسط لسه تاريخه مجاش
-// ============================================================
-let _currentAssigned = false;   // علامة لتحديد أول CURRENT فقط
-
-function resetCurrentFlag() { _currentAssigned = false; }
-
+/* ===== تحديد نوع السطر بناءً على التاريخ =====
+   - jsDate < today  → PAST (مسدد) أو OVERDUE (غير مسدد)
+   - أول قسط jsDate >= today → CURRENT (الدور عليه)
+   - ما بعده → FUTURE
+*/
+let _currentAssigned = false;
+function resetFlag() { _currentAssigned = false; }
 function getRowType(row) {
-    // تاريخ القسط عدى (قبل النهارده)
     if (row.jsDate < today) {
         return row.paid < row.totalDue ? 'OVERDUE' : 'PAST';
     }
-    // أول قسط تاريخه >= اليوم → هو الاستحقاق الحالي
-    if (!_currentAssigned) {
-        _currentAssigned = true;
-        return 'CURRENT';
-    }
+    if (!_currentAssigned) { _currentAssigned = true; return 'CURRENT'; }
     return 'FUTURE';
 }
 
-// ============================================================
-//  badge لحالة القسط (النص الأصلي)
-// ============================================================
-function statusBadge(txt) {
-    if (!txt) return `<span>${txt}</span>`;
-    if (txt.includes('مبكر'))  return `<span class="badge badge-paid-early">${txt}</span>`;
-    if (txt.includes('متأخر')) return `<span class="badge badge-paid-late">${txt}</span>`;
-    if (txt.includes('يستحق')) return `<span class="badge badge-not-due">${txt}</span>`;
-    return `<span class="badge">${txt}</span>`;
+/* ===== badge ===== */
+function badge(txt) {
+    if (!txt) return txt;
+    if (txt.includes('مبكر'))  return '<span class="badge badge-paid-early">'+txt+'</span>';
+    if (txt.includes('متأخر')) return '<span class="badge badge-paid-late">'+txt+'</span>';
+    if (txt.includes('يستحق')) return '<span class="badge badge-not-due">'+txt+'</span>';
+    return '<span class="badge">'+txt+'</span>';
 }
 
-// ============================================================
-//  الدالة الرئيسية
-// ============================================================
+/* ===== الدالة الرئيسية ===== */
 function processAll() {
     const input = document.getElementById('dataInput').value.trim();
     if (!input) { alert('الرجاء لصق البيانات أولاً'); return; }
+    resetFlag();
+    const rows = input.split('\n').map(parseLine).filter(Boolean);
+    if (!rows.length) { alert('لم يتم التعرف على بيانات صحيحة'); return; }
+    rows.forEach(r => { r.rowType = getRowType(r); });
 
-    const rowsData = input.split('\n').map(parseLine).filter(Boolean);
-    if (!rowsData.length) { alert('لم يتم التعرف على بيانات صحيحة'); return; }
+    /* أول سطر يدخل في التصفية = أول OVERDUE أو CURRENT أو FUTURE */
+    const startIdx = rows.findIndex(r => r.rowType !== 'PAST');
 
-    // reset علامة CURRENT قبل كل تحليل جديد
-    resetCurrentFlag();
-    rowsData.forEach(r => { r.rowType = getRowType(r); });
+    /* إجماليات */
+    const tot = {principal:0, fees:0, totalDue:0, paid:0, penalty:0};
+    rows.forEach(r => { tot.principal+=r.principal; tot.fees+=r.fees; tot.totalDue+=r.totalDue; tot.paid+=r.paid; tot.penalty+=r.penalty; });
 
-    // ---- أول سطر يدخل في حساب التصفية = أول OVERDUE أو CURRENT أو FUTURE ----
-    const settlementStartIdx = rowsData.findIndex(r => r.rowType !== 'PAST');
+    /* بناء الجدول */
+    let html = '<table id="resultTable"><thead><tr>'
+        +'<th colspan="9">البيانات الأساسية والغرامات</th>'
+        +'<th colspan="5" class="orange-header">منطقة حساب التصفية</th>'
+        +'</tr><tr>'
+        +'<th>م</th><th>تاريخ الاستحقاق</th><th>أصل</th><th>مصاريف</th><th>الإجمالي</th>'
+        +'<th>المسدد</th><th>أيام تأخير</th><th class="col-penalty">غرامة</th><th>حالة القسط</th>'
+        +'<th class="orange-header">حالة السطر</th>'
+        +'<th class="orange-header">الرصيد (F)</th>'
+        +'<th class="orange-header">عمولة 5% (G)</th>'
+        +'<th class="orange-header">المطلوب قبل الغرامات (H)</th>'
+        +'<th class="orange-header">الصافي شامل الغرامات (I)</th>'
+        +'</tr></thead><tbody>';
 
-    // ---- إجماليات ----
-    const totals = { principal:0, fees:0, totalDue:0, paid:0, penalty:0 };
-    rowsData.forEach(r => {
-        totals.principal += r.principal;
-        totals.fees      += r.fees;
-        totals.totalDue  += r.totalDue;
-        totals.paid      += r.paid;
-        totals.penalty   += r.penalty;
-    });
+    const LABELS = {
+        PAST:    { txt:'سابق (مسدد)',        td:'status-past',    tsf:'tsf-past'    },
+        OVERDUE: { txt:'متأخر غير مسدد',     td:'status-overdue', tsf:'tsf-overdue' },
+        CURRENT: { txt:'استحقاق حالي',       td:'status-current', tsf:'tsf-current' },
+        FUTURE:  { txt:'تصفية مستقبلي',      td:'status-future',  tsf:'tsf-future'  },
+    };
 
-    // ============================================================
-    //  بناء الجدول
-    // ============================================================
-    let tableHtml = `
-    <table id="resultTable">
-      <thead>
-        <tr>
-          <th colspan="9">البيانات الأساسية والغرامات</th>
-          <th colspan="5" class="orange-header">منطقة حساب التصفية</th>
-        </tr>
-        <tr>
-          <th>م</th><th>تاريخ الاستحقاق</th><th>أصل</th><th>مصاريف</th><th>الإجمالي</th>
-          <th>المسدد</th><th>أيام تأخير</th><th class="col-penalty">غرامة</th><th>حالة القسط</th>
-          <th class="orange-header">حالة السطر</th>
-          <th class="orange-header">الرصيد (F)</th>
-          <th class="orange-header">عمولة 5% (G)</th>
-          <th class="orange-header">المطلوب قبل الغرامات (H)</th>
-          <th class="orange-header">الصافي شامل الغرامات (I)</th>
-        </tr>
-      </thead>
-      <tbody>`;
+    let accPen = 0;
+    let S = null; /* بيانات التصفية النهائية من قسط CURRENT */
 
-    let accPenalties       = 0;
-    let firstSettlement    = null;   // I للسطر الأول المؤهل
-    let firstH             = null;   // H للسطر الأول المؤهل (بدون غرامات)
-    let firstAccPenalties  = null;   // الغرامات المتراكمة عند السطر الأول
+    rows.forEach((row, idx) => {
+        accPen += row.penalty;
+        const {txt, td, tsf} = LABELS[row.rowType];
 
-    rowsData.forEach((row, idx) => {
-        accPenalties += row.penalty;
-
-        // نصوص العرض
-        const typeLabels = {
-            PAST:    { txt: 'سابق (مسدد)',     tdCls: 'status-past',    tsfCls: 'tsf-past'    },
-            OVERDUE: { txt: '⚠️ متأخر غير مسدد', tdCls: 'status-overdue', tsfCls: 'tsf-overdue' },
-            CURRENT: { txt: '⭐ استحقاق حالي',   tdCls: 'status-current', tsfCls: 'tsf-current' },
-            FUTURE:  { txt: 'تصفية مستقبلي',    tdCls: 'status-future',  tsfCls: 'tsf-future'  },
-        };
-        const { txt, tdCls, tsfCls } = typeLabels[row.rowType];
-
-        let F_txt='-', G_txt='-', H_txt='-', I_txt='-';
-
-        if (idx >= settlementStartIdx) {
-            // F = إجمالي القسط الحالي + أصول المستقبلية + متأخرات سابقة غير مسددة
-            let F = row.totalDue;
-            let sumPrincipalFuture = 0;
-
-            for (let i = idx + 1; i < rowsData.length; i++) {
-                F += rowsData[i].principal;
-                sumPrincipalFuture += rowsData[i].principal;
+        let Ft='-', Gt='-', Ht='-', It='-';
+        if (idx >= startIdx) {
+            let F = row.totalDue, fprin = 0, overdue = 0;
+            for (let i=idx+1; i<rows.length; i++) { F+=rows[i].principal; fprin+=rows[i].principal; }
+            for (let j=0; j<idx; j++) {
+                const d = rows[j].totalDue - rows[j].paid;
+                if (d>0) { F+=d; overdue+=d; }
             }
-            for (let j = 0; j < idx; j++) {
-                const deficit = rowsData[j].totalDue - rowsData[j].paid;
-                if (deficit > 0) F += deficit;
-            }
-
-            const G = Math.round(sumPrincipalFuture * 0.05);
+            const G = Math.round(fprin * 0.05);
             const H = Math.round(F + G);
-            const I = Math.round(H + accPenalties - row.paid);
+            const I = Math.round(H + accPen - row.paid);
+            Ft = Math.round(F).toLocaleString('ar-EG');
+            Gt = G.toLocaleString('ar-EG');
+            Ht = H.toLocaleString('ar-EG');
+            It = I.toLocaleString('ar-EG');
 
-            F_txt = Math.round(F).toLocaleString('ar-EG');
-            G_txt = G.toLocaleString('ar-EG');
-            H_txt = H.toLocaleString('ar-EG');
-            I_txt = I.toLocaleString('ar-EG');
-
-            if (firstSettlement === null) {
-                firstSettlement   = I;
-                firstH            = H;
-                firstAccPenalties = accPenalties;
+            /* ✅ النتيجة النهائية = قسط الاستحقاق الحالي (CURRENT) فقط */
+            if (row.rowType === 'CURRENT' && S === null) {
+                S = { I, H, G,
+                      penalties: Math.round(accPen),
+                      overdue:   Math.round(overdue),
+                      current:   Math.round(row.totalDue),
+                      fprin:     Math.round(fprin) };
             }
         }
 
-        tableHtml += `<tr>
-          <td class="col-index">${row.m}</td>
-          <td>${row.date}</td>
-          <td>${row.principal.toLocaleString('ar-EG')}</td>
-          <td>${row.fees.toLocaleString('ar-EG')}</td>
-          <td>${row.totalDue.toLocaleString('ar-EG')}</td>
-          <td>${row.paid.toLocaleString('ar-EG')}</td>
-          <td>${row.delayDays > 0 ? row.delayDays : '-'}</td>
-          <td class="col-penalty">${row.penalty > 0 ? row.penalty.toLocaleString('ar-EG') : '-'}</td>
-          <td>${statusBadge(row.statusTxt)}</td>
-          <td class="${tdCls}">${txt}</td>
-          <td class="${tsfCls}">${F_txt}</td>
-          <td class="${tsfCls}">${G_txt}</td>
-          <td class="${tsfCls}">${H_txt}</td>
-          <td class="${tsfCls}">${I_txt}</td>
-        </tr>`;
+        html += '<tr>'
+            +'<td class="col-index">'+row.m+'</td>'
+            +'<td>'+row.date+'</td>'
+            +'<td>'+row.principal.toLocaleString('ar-EG')+'</td>'
+            +'<td>'+row.fees.toLocaleString('ar-EG')+'</td>'
+            +'<td>'+row.totalDue.toLocaleString('ar-EG')+'</td>'
+            +'<td>'+row.paid.toLocaleString('ar-EG')+'</td>'
+            +'<td>'+(row.delayDays>0?row.delayDays:'-')+'</td>'
+            +'<td class="col-penalty">'+(row.penalty>0?row.penalty.toLocaleString('ar-EG'):'-')+'</td>'
+            +'<td>'+badge(row.statusTxt)+'</td>'
+            +'<td class="'+td+'">'+txt+'</td>'
+            +'<td class="'+tsf+'">'+Ft+'</td>'
+            +'<td class="'+tsf+'">'+Gt+'</td>'
+            +'<td class="'+tsf+'">'+Ht+'</td>'
+            +'<td class="'+tsf+'">'+It+'</td>'
+            +'</tr>';
     });
 
-    // ---- صف الإجماليات ----
-    const totalOverdue = Math.round(totals.totalDue - totals.paid + totals.penalty);
-    tableHtml += `
-      <tr class="total-row">
-        <td colspan="2">📊 إجمالي المسحوبات</td>
-        <td>${Math.round(totals.principal).toLocaleString('ar-EG')}</td>
-        <td>${Math.round(totals.fees).toLocaleString('ar-EG')}</td>
-        <td>${Math.round(totals.totalDue).toLocaleString('ar-EG')}</td>
-        <td>${Math.round(totals.paid).toLocaleString('ar-EG')}</td>
-        <td>-</td>
-        <td class="col-penalty">${Math.round(totals.penalty).toLocaleString('ar-EG')}</td>
-        <td colspan="2">إجمالي المتأخرات الفعلي (شامل الغرامات):</td>
-        <td colspan="4" style="font-size:15px; font-weight:bold; color:#7b0000;">
-          ${totalOverdue.toLocaleString('ar-EG')} ج.م
-        </td>
-      </tr>`;
+    /* ---- صف الإجماليات ---- */
+    const totalOD = Math.round(tot.totalDue - tot.paid + tot.penalty);
+    html += '<tr class="total-row">'
+        +'<td colspan="2">إجمالي المسحوبات</td>'
+        +'<td>'+Math.round(tot.principal).toLocaleString('ar-EG')+'</td>'
+        +'<td>'+Math.round(tot.fees).toLocaleString('ar-EG')+'</td>'
+        +'<td>'+Math.round(tot.totalDue).toLocaleString('ar-EG')+'</td>'
+        +'<td>'+Math.round(tot.paid).toLocaleString('ar-EG')+'</td>'
+        +'<td>-</td>'
+        +'<td class="col-penalty">'+Math.round(tot.penalty).toLocaleString('ar-EG')+'</td>'
+        +'<td colspan="2">إجمالي المتأخرات الفعلي (شامل الغرامات):</td>'
+        +'<td colspan="4" style="font-size:15px;font-weight:bold;color:#7b0000;">'+totalOD.toLocaleString('ar-EG')+' ج.م</td>'
+        +'</tr>';
 
-    // ---- صف تفسير أرقام التصفية ----
-    if (firstSettlement !== null) {
-        // حساب: مبلغ التصفية الأساسي (H) = firstH
-        // الغرامات المضافة = firstAccPenalties
-        // مخصوم منه: أي مبالغ مسددة ضمن القسط الأول في التصفية (مدمج بالفعل في I)
-        // نوضح: H = مبلغ التصفية بدون غرامات ، penalties = الغرامات ، I = الإجمالي
-        tableHtml += `
-      <tr class="breakdown-row">
-        <td colspan="9" style="text-align:right; padding-right:20px; font-size:13px; font-weight:bold;">
-          📋 تفصيل مبلغ التصفية:
-          &nbsp;&nbsp;
-          <span style="color:#aaa; font-weight:normal;">
-            الإجمالي = (أصول + مصاريف + عمولة 5% + متأخرات سابقة) + غرامات تأخير − المسدد
-          </span>
-        </td>
-        <td colspan="2" class="val-cell green" style="font-size:13px; padding:8px;">
-          💰 مبلغ التصفية الأساسي (H)<br>
-          <span style="font-size:16px;">${firstH.toLocaleString('ar-EG')} ج.م</span>
-        </td>
-        <td class="val-cell red" style="font-size:13px; padding:8px;">
-          ⚠️ إجمالي الغرامات<br>
-          <span style="font-size:16px;">${Math.round(firstAccPenalties).toLocaleString('ar-EG')} ج.م</span>
-        </td>
-        <td class="val-cell gold" style="font-size:13px; padding:8px;">
-          ✅ الإجمالي المطلوب (I)<br>
-          <span style="font-size:18px;">${firstSettlement.toLocaleString('ar-EG')} ج.م</span>
-        </td>
-      </tr>`;
+    if (S !== null) {
+        /* ---- صف التفصيل: متأخرات + استحقاق + أصول + عمولة + غرامات = الإجمالي ---- */
+        const hasOD = S.overdue > 0;
+        let cells = '';
+        if (hasOD) {
+            cells += '<td class="bd-sep" style="width:3%"></td>'
+                +'<td style="width:'+(hasOD?'14':'16')+'%">'
+                +'<div class="bd-label" style="color:#e74c3c;">متأخرات غير مسددة</div>'
+                +'<div class="bd-val" style="color:#ff6b6b;">'+S.overdue.toLocaleString('ar-EG')+' ج.م</div>'
+                +'</td>'
+                +'<td class="bd-sep">+</td>';
+        }
+        cells += '<td style="width:14%">'
+            +'<div class="bd-label" style="color:#f39c12;">قسط الاستحقاق الحالي</div>'
+            +'<div class="bd-val" style="color:#f39c12;">'+S.current.toLocaleString('ar-EG')+' ج.م</div>'
+            +'</td>'
+            +'<td class="bd-sep">+</td>'
+            +'<td style="width:14%">'
+            +'<div class="bd-label" style="color:#5dade2;">أصول مستقبلية</div>'
+            +'<div class="bd-val" style="color:#5dade2;">'+S.fprin.toLocaleString('ar-EG')+' ج.م</div>'
+            +'</td>'
+            +'<td class="bd-sep">+</td>'
+            +'<td style="width:14%">'
+            +'<div class="bd-label" style="color:#2ecc71;">عمولة 5% (على الأصول)</div>'
+            +'<div class="bd-val" style="color:#2ecc71;">'+S.G.toLocaleString('ar-EG')+' ج.م</div>'
+            +'</td>'
+            +'<td class="bd-sep">+</td>'
+            +'<td style="width:14%">'
+            +'<div class="bd-label" style="color:#e74c3c;">إجمالي الغرامات</div>'
+            +'<div class="bd-val" style="color:#ff6b6b;">'+S.penalties.toLocaleString('ar-EG')+' ج.م</div>'
+            +'</td>'
+            +'<td class="bd-sep">=</td>'
+            +'<td class="bd-total-cell" style="width:16%">'
+            +'<div class="bd-label" style="color:#f1c40f;">إجمالي مبلغ التصفية</div>'
+            +'<div class="bd-val">'+S.I.toLocaleString('ar-EG')+' ج.م</div>'
+            +'</td>';
 
-        // ---- صف النتيجة النهائية ----
-        tableHtml += `
-      <tr class="final-row">
-        <td colspan="9" style="text-align:right; padding-right:20px;">
-          🏁 صافي المبلغ المطلوب لتصفية القرض بالكامل
-          (استحقاق حالي + متأخرات + أصول مستقبلية + عمولة 5% + غرامات):
-        </td>
-        <td colspan="5" class="final-val">
-          ${firstSettlement.toLocaleString('ar-EG')} جنيه مصري 🇪🇬
-        </td>
-      </tr>`;
+        html += '<tr><td colspan="14" style="padding:0;">'
+            +'<table class="breakdown-inner"><tr>'
+            +'<td style="padding:8px 15px;color:#bdc3c7;font-size:12px;white-space:nowrap;width:auto;">'
+            +'تفصيل مبلغ التصفية</td>'
+            +cells
+            +'</tr></table>'
+            +'</td></tr>';
+
+        /* ---- صف النتيجة النهائية ---- */
+        html += '<tr class="final-row">'
+            +'<td colspan="9" style="text-align:right;padding-right:20px;font-size:14px;">'
+            +'صافي المبلغ المطلوب لتصفية القرض بالكامل:'
+            +'</td>'
+            +'<td colspan="5" class="final-val">'+S.I.toLocaleString('ar-EG')+' جنيه مصري</td>'
+            +'</tr>';
     } else {
-        tableHtml += `
-      <tr class="final-row">
-        <td colspan="14" style="font-size:18px; color:#2ecc71; font-weight:bold; padding:16px;">
-          ✅ جميع الأقساط المستحقة مسددة بالكامل — لا توجد تصفية مطلوبة
-        </td>
-      </tr>`;
+        html += '<tr class="final-row"><td colspan="14" style="font-size:18px;color:#2ecc71;font-weight:bold;padding:16px;">'
+            +'جميع الأقساط المستحقة مسددة — لا توجد تصفية مطلوبة'
+            +'</td></tr>';
     }
 
-    tableHtml += `</tbody></table>`;
-    document.getElementById('tableOutput').innerHTML = tableHtml;
+    html += '</tbody></table>';
+    document.getElementById('tableOutput').innerHTML = html;
 
-    // ============================================================
-    //  بطاقات الإحصاء + legend
-    // ============================================================
-    const pastCount    = rowsData.filter(r => r.rowType === 'PAST').length;
-    const overdueCount = rowsData.filter(r => r.rowType === 'OVERDUE').length;
-    const currentCount = rowsData.filter(r => r.rowType === 'CURRENT').length;
-    const futureCount  = rowsData.filter(r => r.rowType === 'FUTURE').length;
-    const lateCount    = rowsData.filter(r => r.delayDays > 0).length;
+    /* ---- بطاقات الإحصاء ---- */
+    const pastC    = rows.filter(r=>r.rowType==='PAST').length;
+    const overdueC = rows.filter(r=>r.rowType==='OVERDUE').length;
+    const currentC = rows.filter(r=>r.rowType==='CURRENT').length;
+    const futureC  = rows.filter(r=>r.rowType==='FUTURE').length;
 
-    document.getElementById('statsArea').innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card card-blue">
-        <span class="val">${rowsData.length}</span><span class="lbl">إجمالي الأقساط</span>
-      </div>
-      <div class="stat-card card-green">
-        <span class="val">${pastCount}</span><span class="lbl">سابقة مسددة</span>
-      </div>
-      <div class="stat-card card-red">
-        <span class="val">${overdueCount}</span><span class="lbl">متأخرة غير مسددة</span>
-      </div>
-      <div class="stat-card card-orange">
-        <span class="val">${currentCount}</span><span class="lbl">استحقاق الشهر الحالي</span>
-      </div>
-      <div class="stat-card card-purple">
-        <span class="val">${futureCount}</span><span class="lbl">أقساط مستقبلية</span>
-      </div>
-      <div class="stat-card card-gold">
-        <span class="val">${Math.round(totals.penalty).toLocaleString('ar-EG')}</span>
-        <span class="lbl">إجمالي الغرامات (ج.م)</span>
-      </div>
-    </div>
-    <div class="legend">
-      <strong>دليل الألوان:</strong>
-      <div class="legend-item"><div class="legend-box" style="background:#f5f6fa;border:1px solid #ccc"></div> سابق مسدد</div>
-      <div class="legend-item"><div class="legend-box" style="background:#fdecea;border:1px solid #e74c3c"></div> متأخر غير مسدد</div>
-      <div class="legend-item"><div class="legend-box" style="background:#fff3e0;border:2px solid #e67e22"></div> استحقاق الشهر الحالي</div>
-      <div class="legend-item"><div class="legend-box" style="background:#e8f0fe;border:1px solid #3498db"></div> مستقبلي</div>
-      <div class="legend-item"><div class="legend-box" style="background:#fee2e2"></div> غرامة تأخير</div>
-    </div>`;
+    document.getElementById('statsArea').innerHTML =
+        '<div class="stats-grid">'
+        +'<div class="stat-card card-blue"><span class="val">'+rows.length+'</span><span class="lbl">إجمالي الأقساط</span></div>'
+        +'<div class="stat-card card-green"><span class="val">'+pastC+'</span><span class="lbl">سابقة مسددة</span></div>'
+        +'<div class="stat-card card-red"><span class="val">'+overdueC+'</span><span class="lbl">متأخرة غير مسددة</span></div>'
+        +'<div class="stat-card card-orange"><span class="val">'+currentC+'</span><span class="lbl">استحقاق الشهر الحالي</span></div>'
+        +'<div class="stat-card card-purple"><span class="val">'+futureC+'</span><span class="lbl">أقساط مستقبلية</span></div>'
+        +'<div class="stat-card card-gold"><span class="val">'+Math.round(tot.penalty).toLocaleString('ar-EG')+'</span><span class="lbl">إجمالي الغرامات (ج.م)</span></div>'
+        +'</div>'
+        +'<div class="legend"><strong>دليل الألوان:</strong>'
+        +'<div class="legend-item"><div class="legend-box" style="background:#f5f6fa;border:1px solid #ccc"></div> سابق مسدد</div>'
+        +'<div class="legend-item"><div class="legend-box" style="background:#fdecea;border:1px solid #e74c3c"></div> متأخر غير مسدد</div>'
+        +'<div class="legend-item"><div class="legend-box" style="background:#fff3e0;border:2px solid #e67e22"></div> استحقاق حالي</div>'
+        +'<div class="legend-item"><div class="legend-box" style="background:#e8f0fe;border:1px solid #3498db"></div> مستقبلي</div>'
+        +'<div class="legend-item"><div class="legend-box" style="background:#fee2e2"></div> غرامة تأخير</div>'
+        +'</div>';
 }
 
-// ============================================================
 function exportToExcel() {
-    const table = document.getElementById('resultTable');
-    if (!table) { alert('لا توجد بيانات للتصدير'); return; }
-    const wb = XLSX.utils.table_to_book(table, { sheet: 'تقرير التصفية' });
+    const t = document.getElementById('resultTable');
+    if (!t) { alert('لا توجد بيانات للتصدير'); return; }
+    const wb = XLSX.utils.table_to_book(t, {sheet:'تقرير التصفية'});
     XLSX.writeFile(wb, 'تقرير_تصفية_القرض.xlsx');
 }
 
 function clearAll() {
     document.getElementById('dataInput').value = '';
     document.getElementById('tableOutput').innerHTML = '';
-    document.getElementById('statsArea').innerHTML   = '';
+    document.getElementById('statsArea').innerHTML = '';
 }
 </script>
 </body>
