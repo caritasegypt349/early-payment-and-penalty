@@ -18,6 +18,19 @@
         .btn-process { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
         .btn-excel   { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; }
         .btn-clear   { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        .btn-settlement { background: linear-gradient(135deg, #8e44ad, #6c3483); color: white; }
+        .mode-tabs { display: flex; gap: 10px; margin-bottom: 18px; }
+        .mode-tab {
+            flex: 1; text-align: center; padding: 12px; border-radius: 8px; cursor: pointer;
+            font-weight: bold; font-size: 14px; border: 2px solid transparent;
+            background: #ecf0f1; color: #7f8c8d; transition: 0.2s;
+        }
+        .mode-tab.active-client { background: #eafaf1; color: #1e8449; border-color: #1e8449; }
+        .mode-tab.active-insurance { background: #ebf5fb; color: #1a5276; border-color: #1a5276; }
+        .mode-note { text-align: center; font-size: 12px; color: #7f8c8d; margin: -8px 0 15px; }
+        .settlement-bar {
+            display: none; justify-content: center; margin-top: 16px;
+        }
         .table-container { overflow-x: auto; margin-top: 20px; max-height: 640px; border: 1px solid #ddd; border-radius: 8px; }
         table { width: 100%; border-collapse: collapse; min-width: 1750px; }
         th, td { border: 1px solid #d1d8e0; padding: 9px 10px; text-align: center; font-size: 13px; }
@@ -71,6 +84,13 @@
 <div class="container">
     <h2>&#x1F3E6; مساعد تصفية العملاء من برنامج المحصل</h2>
     <div class="date-info" id="currentDateDisplay"></div>
+
+    <div class="mode-tabs">
+        <div class="mode-tab active-client" id="tabClient" onclick="setMode('client')">&#x1F464; تصفية للعميل (تشمل عمولة 5% والغرامات)</div>
+        <div class="mode-tab" id="tabInsurance" onclick="setMode('insurance')">&#x1F3E2; تصفية لشركة التأمين (بدون عمولة ولا غرامات)</div>
+    </div>
+    <div class="mode-note" id="modeNote"></div>
+
     <textarea id="dataInput" placeholder="قم بلصق بيانات الأقساط هنا (مباشرةً من برنامج المحصل)..."></textarea>
     <div class="btn-group">
         <button class="btn-process" onclick="processAll()">&#x1F4CA; تحليل البيانات وعرض الإجماليات</button>
@@ -79,6 +99,9 @@
     </div>
     <div id="statsArea"></div>
     <div id="tableOutput" class="table-container"></div>
+    <div class="settlement-bar" id="settlementBar">
+        <button class="btn-settlement" onclick="openSettlementRequest()">&#x1F4C4; فتح بيانات طلب السداد المعجل بهذه الأرقام (اختياري)</button>
+    </div>
     <div class="disclaimer">&#x26A0;&#xFE0F; النظام تحت الاختبار والتعديل.. يرجى مراجعة النتائج بعناية قبل الاعتماد عليها.</div>
     <div class="footer-credit">Powered by <span>Loans &amp; Economic Empowerment IT Group</span></div>
 </div>
@@ -131,6 +154,24 @@ function badge(txt) {
 }
 
 /* ===== الدالة الرئيسية ===== */
+let parsedRows = [];
+let currentMode = 'client';
+let lastClientS = null; /* نتيجة تصفية العميل (تُستخدم دايمًا لزرار طلب السداد المعجل) */
+
+const MODE_NOTES = {
+    client:    'يشمل عمولة السداد المعجل (5%) والغرامات — هو المبلغ اللى العميل يدفعه فعليًا.',
+    insurance: 'بدون عمولة 5% وبدون غرامات — المبلغ المطلوب من شركة التأمين فقط (الأصول + الفوائد المستحقة).'
+};
+
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('tabClient').classList.toggle('active-client', mode === 'client');
+    document.getElementById('tabInsurance').classList.toggle('active-insurance', mode === 'insurance');
+    document.getElementById('modeNote').textContent = MODE_NOTES[mode];
+    if (parsedRows.length) renderAll(mode);
+}
+setMode('client');
+
 function processAll() {
     const input = document.getElementById('dataInput').value.trim();
     if (!input) { alert('الرجاء لصق البيانات أولاً'); return; }
@@ -138,26 +179,77 @@ function processAll() {
     const rows = input.split('\n').map(parseLine).filter(Boolean);
     if (!rows.length) { alert('لم يتم التعرف على بيانات صحيحة'); return; }
     rows.forEach(r => { r.rowType = getRowType(r); });
+    parsedRows = rows;
+    renderAll(currentMode);
+}
 
-    /* أول سطر يدخل في التصفية = أول OVERDUE أو CURRENT أو FUTURE */
+/* ===== حساب التصفية لوضع معيّن (عميل / شركة تأمين) بدون إعادة تحليل النص ===== */
+function computeLiquidation(rows, mode) {
     const startIdx = rows.findIndex(r => r.rowType !== 'PAST');
+    const isInsurance = mode === 'insurance';
 
-    /* إجماليات */
     const tot = {principal:0, fees:0, totalDue:0, paid:0, penalty:0};
-    rows.forEach(r => { tot.principal+=r.principal; tot.fees+=r.fees; tot.totalDue+=r.totalDue; tot.paid+=r.paid; tot.penalty+=r.penalty; });
+    rows.forEach(r => {
+        tot.principal += r.principal; tot.fees += r.fees; tot.totalDue += r.totalDue; tot.paid += r.paid;
+        tot.penalty += isInsurance ? 0 : r.penalty;
+    });
 
-    /* بناء الجدول */
+    const rowsCalc = [];
+    let accPen = 0;
+    let S = null;
+
+    rows.forEach((row, idx) => {
+        const effPenalty = isInsurance ? 0 : row.penalty;
+        accPen += effPenalty;
+
+        let F=null, G=null, H=null, I=null, fprin=0, overdue=0, waivedFees=0;
+        if (idx >= startIdx) {
+            F = row.totalDue;
+            for (let i=idx+1; i<rows.length; i++) { F += rows[i].principal; fprin += rows[i].principal; waivedFees += rows[i].fees; }
+            for (let j=0; j<idx; j++) {
+                const d = rows[j].totalDue - rows[j].paid;
+                if (d>0) { F += d; overdue += d; }
+            }
+            G = isInsurance ? 0 : Math.round(fprin * 0.05);
+            H = Math.round(F + G);
+            I = Math.round(H + accPen - row.paid);
+
+            if (row.rowType === 'CURRENT' && S === null) {
+                S = { I, H, G, F: Math.round(F),
+                      penalties: Math.round(accPen),
+                      overdue:   Math.round(overdue),
+                      current:   Math.round(row.totalDue),
+                      fprin:     Math.round(fprin),
+                      waivedFees: Math.round(waivedFees) };
+            }
+        }
+        rowsCalc.push({ row, effPenalty, F, G, H, I });
+    });
+
+    return { tot, rowsCalc, S, startIdx };
+}
+
+/* ===== عرض النتائج ===== */
+function renderAll(mode) {
+    const rows = parsedRows;
+    const { tot, rowsCalc, S } = computeLiquidation(rows, mode);
+
+    /* نحتفظ دايمًا بنتيجة تصفية العميل (مهما كان الوضع المعروض حاليًا) عشان زرار طلب السداد المعجل */
+    lastClientS = mode === 'client' ? S : computeLiquidation(rows, 'client').S;
+
+    const isInsurance = mode === 'insurance';
+
     let html = '<table id="resultTable"><thead><tr>'
         +'<th colspan="9">البيانات الأساسية والغرامات</th>'
-        +'<th colspan="5" class="orange-header">منطقة حساب التصفية</th>'
+        +'<th colspan="5" class="orange-header">منطقة حساب التصفية '+(isInsurance?'(شركة التأمين)':'(العميل)')+'</th>'
         +'</tr><tr>'
         +'<th>م</th><th>تاريخ الاستحقاق</th><th>أصل</th><th>مصاريف</th><th>الإجمالي</th>'
         +'<th>المسدد</th><th>أيام تأخير</th><th class="col-penalty">غرامة</th><th>حالة القسط</th>'
         +'<th class="orange-header">حالة السطر</th>'
         +'<th class="orange-header">الرصيد (F)</th>'
-        +'<th class="orange-header">عمولة 5% (G)</th>'
+        +'<th class="orange-header">'+(isInsurance?'عمولة (غير مطبقة)':'عمولة 5% (G)')+'</th>'
         +'<th class="orange-header">المطلوب قبل الغرامات (H)</th>'
-        +'<th class="orange-header">الصافي شامل الغرامات (I)</th>'
+        +'<th class="orange-header">'+(isInsurance?'الصافي (بدون غرامات)':'الصافي شامل الغرامات (I)')+'</th>'
         +'</tr></thead><tbody>';
 
     const LABELS = {
@@ -167,48 +259,22 @@ function processAll() {
         FUTURE:  { txt:'تصفية مستقبلي',      td:'status-future',  tsf:'tsf-future'  },
     };
 
-    let accPen = 0;
-    let S = null; /* بيانات التصفية النهائية من قسط CURRENT */
-
-    rows.forEach((row, idx) => {
-        accPen += row.penalty;
+    rowsCalc.forEach(({row, effPenalty, F, G, H, I}) => {
         const {txt, td, tsf} = LABELS[row.rowType];
-
-        let Ft='-', Gt='-', Ht='-', It='-';
-        if (idx >= startIdx) {
-            let F = row.totalDue, fprin = 0, overdue = 0;
-            for (let i=idx+1; i<rows.length; i++) { F+=rows[i].principal; fprin+=rows[i].principal; }
-            for (let j=0; j<idx; j++) {
-                const d = rows[j].totalDue - rows[j].paid;
-                if (d>0) { F+=d; overdue+=d; }
-            }
-            const G = Math.round(fprin * 0.05);
-            const H = Math.round(F + G);
-            const I = Math.round(H + accPen - row.paid);
-            Ft = Math.round(F).toLocaleString('ar-EG');
-            Gt = G.toLocaleString('ar-EG');
-            Ht = H.toLocaleString('ar-EG');
-            It = I.toLocaleString('ar-EG');
-
-            /* ✅ النتيجة النهائية = قسط الاستحقاق الحالي (CURRENT) فقط */
-            if (row.rowType === 'CURRENT' && S === null) {
-                S = { I, H, G,
-                      penalties: Math.round(accPen),
-                      overdue:   Math.round(overdue),
-                      current:   Math.round(row.totalDue),
-                      fprin:     Math.round(fprin) };
-            }
-        }
+        const Ft = F!==null ? Math.round(F).toLocaleString('en-US') : '-';
+        const Gt = G!==null ? G.toLocaleString('en-US') : '-';
+        const Ht = H!==null ? H.toLocaleString('en-US') : '-';
+        const It = I!==null ? I.toLocaleString('en-US') : '-';
 
         html += '<tr>'
             +'<td class="col-index">'+row.m+'</td>'
             +'<td>'+row.date+'</td>'
-            +'<td>'+row.principal.toLocaleString('ar-EG')+'</td>'
-            +'<td>'+row.fees.toLocaleString('ar-EG')+'</td>'
-            +'<td>'+row.totalDue.toLocaleString('ar-EG')+'</td>'
-            +'<td>'+row.paid.toLocaleString('ar-EG')+'</td>'
+            +'<td>'+row.principal.toLocaleString('en-US')+'</td>'
+            +'<td>'+row.fees.toLocaleString('en-US')+'</td>'
+            +'<td>'+row.totalDue.toLocaleString('en-US')+'</td>'
+            +'<td>'+row.paid.toLocaleString('en-US')+'</td>'
             +'<td>'+(row.delayDays>0?row.delayDays:'-')+'</td>'
-            +'<td class="col-penalty">'+(row.penalty>0?row.penalty.toLocaleString('ar-EG'):'-')+'</td>'
+            +'<td class="col-penalty">'+(effPenalty>0?effPenalty.toLocaleString('en-US'):'-')+'</td>'
             +'<td>'+badge(row.statusTxt)+'</td>'
             +'<td class="'+td+'">'+txt+'</td>'
             +'<td class="'+tsf+'">'+Ft+'</td>'
@@ -222,51 +288,55 @@ function processAll() {
     const totalOD = Math.round(tot.totalDue - tot.paid + tot.penalty);
     html += '<tr class="total-row">'
         +'<td colspan="2">إجمالي المسحوبات</td>'
-        +'<td>'+Math.round(tot.principal).toLocaleString('ar-EG')+'</td>'
-        +'<td>'+Math.round(tot.fees).toLocaleString('ar-EG')+'</td>'
-        +'<td>'+Math.round(tot.totalDue).toLocaleString('ar-EG')+'</td>'
-        +'<td>'+Math.round(tot.paid).toLocaleString('ar-EG')+'</td>'
+        +'<td>'+Math.round(tot.principal).toLocaleString('en-US')+'</td>'
+        +'<td>'+Math.round(tot.fees).toLocaleString('en-US')+'</td>'
+        +'<td>'+Math.round(tot.totalDue).toLocaleString('en-US')+'</td>'
+        +'<td>'+Math.round(tot.paid).toLocaleString('en-US')+'</td>'
         +'<td>-</td>'
-        +'<td class="col-penalty">'+Math.round(tot.penalty).toLocaleString('ar-EG')+'</td>'
-        +'<td colspan="2">إجمالي المتأخرات الفعلي (شامل الغرامات):</td>'
-        +'<td colspan="4" style="font-size:15px;font-weight:bold;color:#7b0000;">'+totalOD.toLocaleString('ar-EG')+' ج.م</td>'
+        +'<td class="col-penalty">'+Math.round(tot.penalty).toLocaleString('en-US')+'</td>'
+        +'<td colspan="2">'+(isInsurance?'إجمالي المتأخرات الفعلي (بدون غرامات):':'إجمالي المتأخرات الفعلي (شامل الغرامات):')+'</td>'
+        +'<td colspan="4" style="font-size:15px;font-weight:bold;color:#7b0000;">'+totalOD.toLocaleString('en-US')+' ج.م</td>'
         +'</tr>';
 
     if (S !== null) {
-        /* ---- صف التفصيل: متأخرات + استحقاق + أصول + عمولة + غرامات = الإجمالي ---- */
+        /* ---- صف التفصيل ---- */
         const hasOD = S.overdue > 0;
         let cells = '';
         if (hasOD) {
             cells += '<td class="bd-sep" style="width:3%"></td>'
-                +'<td style="width:'+(hasOD?'14':'16')+'%">'
+                +'<td style="width:14%">'
                 +'<div class="bd-label" style="color:#e74c3c;">متأخرات غير مسددة</div>'
-                +'<div class="bd-val" style="color:#ff6b6b;">'+S.overdue.toLocaleString('ar-EG')+' ج.م</div>'
+                +'<div class="bd-val" style="color:#ff6b6b;">'+S.overdue.toLocaleString('en-US')+' ج.م</div>'
                 +'</td>'
                 +'<td class="bd-sep">+</td>';
         }
         cells += '<td style="width:14%">'
             +'<div class="bd-label" style="color:#f39c12;">قسط الاستحقاق الحالي</div>'
-            +'<div class="bd-val" style="color:#f39c12;">'+S.current.toLocaleString('ar-EG')+' ج.م</div>'
+            +'<div class="bd-val" style="color:#f39c12;">'+S.current.toLocaleString('en-US')+' ج.م</div>'
             +'</td>'
             +'<td class="bd-sep">+</td>'
             +'<td style="width:14%">'
             +'<div class="bd-label" style="color:#5dade2;">أصول مستقبلية</div>'
-            +'<div class="bd-val" style="color:#5dade2;">'+S.fprin.toLocaleString('ar-EG')+' ج.م</div>'
-            +'</td>'
-            +'<td class="bd-sep">+</td>'
-            +'<td style="width:14%">'
-            +'<div class="bd-label" style="color:#2ecc71;">عمولة 5% (على الأصول)</div>'
-            +'<div class="bd-val" style="color:#2ecc71;">'+S.G.toLocaleString('ar-EG')+' ج.م</div>'
-            +'</td>'
-            +'<td class="bd-sep">+</td>'
-            +'<td style="width:14%">'
-            +'<div class="bd-label" style="color:#e74c3c;">إجمالي الغرامات</div>'
-            +'<div class="bd-val" style="color:#ff6b6b;">'+S.penalties.toLocaleString('ar-EG')+' ج.م</div>'
-            +'</td>'
-            +'<td class="bd-sep">=</td>'
+            +'<div class="bd-val" style="color:#5dade2;">'+S.fprin.toLocaleString('en-US')+' ج.م</div>'
+            +'</td>';
+
+        if (!isInsurance) {
+            cells += '<td class="bd-sep">+</td>'
+                +'<td style="width:14%">'
+                +'<div class="bd-label" style="color:#2ecc71;">عمولة 5% (على الأصول)</div>'
+                +'<div class="bd-val" style="color:#2ecc71;">'+S.G.toLocaleString('en-US')+' ج.م</div>'
+                +'</td>'
+                +'<td class="bd-sep">+</td>'
+                +'<td style="width:14%">'
+                +'<div class="bd-label" style="color:#e74c3c;">إجمالي الغرامات</div>'
+                +'<div class="bd-val" style="color:#ff6b6b;">'+S.penalties.toLocaleString('en-US')+' ج.م</div>'
+                +'</td>';
+        }
+
+        cells += '<td class="bd-sep">=</td>'
             +'<td class="bd-total-cell" style="width:16%">'
             +'<div class="bd-label" style="color:#f1c40f;">إجمالي مبلغ التصفية</div>'
-            +'<div class="bd-val">'+S.I.toLocaleString('ar-EG')+' ج.م</div>'
+            +'<div class="bd-val">'+S.I.toLocaleString('en-US')+' ج.م</div>'
             +'</td>';
 
         html += '<tr><td colspan="14" style="padding:0;">'
@@ -277,12 +347,17 @@ function processAll() {
             +'</tr></table>'
             +'</td></tr>';
 
-        /* ---- صف النتيجة النهائية ---- */
+        if (!isInsurance && S.waivedFees > 0) {
+            html += '<tr><td colspan="14" style="padding:6px 15px;background:#fdf6e3;color:#7d6608;font-size:12.5px;text-align:right;">'
+                +'&#x1F4A1; قيمة الفوائد المتبقية المخصومة على العميل نتيجة السداد المعجل (فوائد الأقساط المستقبلية التى لن تُحصَّل): <strong>'
+                +S.waivedFees.toLocaleString('en-US')+' ج.م</strong></td></tr>';
+        }
+
         html += '<tr class="final-row">'
             +'<td colspan="9" style="text-align:right;padding-right:20px;font-size:14px;">'
-            +'صافي المبلغ المطلوب لتصفية القرض بالكامل:'
+            +(isInsurance ? 'صافي المبلغ المطلوب من شركة التأمين:' : 'صافي المبلغ المطلوب لتصفية القرض بالكامل:')
             +'</td>'
-            +'<td colspan="5" class="final-val">'+S.I.toLocaleString('ar-EG')+' جنيه مصري</td>'
+            +'<td colspan="5" class="final-val">'+S.I.toLocaleString('en-US')+' جنيه مصري</td>'
             +'</tr>';
     } else {
         html += '<tr class="final-row"><td colspan="14" style="font-size:18px;color:#2ecc71;font-weight:bold;padding:16px;">'
@@ -292,6 +367,9 @@ function processAll() {
 
     html += '</tbody></table>';
     document.getElementById('tableOutput').innerHTML = html;
+
+    /* ---- زرار طلب السداد المعجل: يظهر فقط لو فيه تصفية فعلية للعميل ---- */
+    document.getElementById('settlementBar').style.display = (lastClientS !== null) ? 'flex' : 'none';
 
     /* ---- بطاقات الإحصاء ---- */
     const pastC    = rows.filter(r=>r.rowType==='PAST').length;
@@ -306,7 +384,7 @@ function processAll() {
         +'<div class="stat-card card-red"><span class="val">'+overdueC+'</span><span class="lbl">متأخرة غير مسددة</span></div>'
         +'<div class="stat-card card-orange"><span class="val">'+currentC+'</span><span class="lbl">استحقاق الشهر الحالي</span></div>'
         +'<div class="stat-card card-purple"><span class="val">'+futureC+'</span><span class="lbl">أقساط مستقبلية</span></div>'
-        +'<div class="stat-card card-gold"><span class="val">'+Math.round(tot.penalty).toLocaleString('ar-EG')+'</span><span class="lbl">إجمالي الغرامات (ج.م)</span></div>'
+        +'<div class="stat-card card-gold"><span class="val">'+Math.round(tot.penalty).toLocaleString('en-US')+'</span><span class="lbl">إجمالي الغرامات (ج.م)</span></div>'
         +'</div>'
         +'<div class="legend"><strong>دليل الألوان:</strong>'
         +'<div class="legend-item"><div class="legend-box" style="background:#f5f6fa;border:1px solid #ccc"></div> سابق مسدد</div>'
@@ -315,6 +393,24 @@ function processAll() {
         +'<div class="legend-item"><div class="legend-box" style="background:#e8f0fe;border:1px solid #3498db"></div> مستقبلي</div>'
         +'<div class="legend-item"><div class="legend-box" style="background:#fee2e2"></div> غرامة تأخير</div>'
         +'</div>';
+}
+
+/* ===== فتح بيانات طلب السداد المعجل (اختيارى) =====
+   عدّل الرابط ده لو صفحة طلب السداد المعجل عندكم على مسار مختلف */
+const SETTLEMENT_FORM_URL = "https://caritasegypt349.github.io/Advance-Payment/";
+
+function openSettlementRequest() {
+    if (!lastClientS) { alert('محتاج تحلل بيانات فيها تصفية مطلوبة الأول'); return; }
+    const S = lastClientS;
+    const params = new URLSearchParams({
+        principal: S.F,
+        commission: S.G,
+        total: S.H,
+        remainingInterest: S.waivedFees,
+        totalRemaining: S.F + S.waivedFees
+        /* ملحوظة: الغرامة مش بتتبعت لأن نموذج طلب السداد المعجل مفهوش خانة غرامة */
+    });
+    window.open(SETTLEMENT_FORM_URL + '?' + params.toString(), '_blank');
 }
 
 function exportToExcel() {
@@ -328,6 +424,9 @@ function clearAll() {
     document.getElementById('dataInput').value = '';
     document.getElementById('tableOutput').innerHTML = '';
     document.getElementById('statsArea').innerHTML = '';
+    document.getElementById('settlementBar').style.display = 'none';
+    parsedRows = [];
+    lastClientS = null;
 }
 </script>
 </body>
