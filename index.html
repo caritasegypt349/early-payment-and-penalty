@@ -8,13 +8,13 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1800px; margin: auto; background: white; padding: 25px; border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-        h2 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; font-size: 22px; margin-bottom: 8px; }
+        .container h2 { color: #2c3e50; text-align: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; font-size: 22px; margin-bottom: 8px; }
         .date-info { text-align: center; margin-bottom: 15px; color: #2980b9; font-weight: bold; font-size: 14px; }
-        textarea { width: 100%; height: 130px; padding: 12px; border: 2px solid #dfe6e9; border-radius: 8px; margin-bottom: 15px; outline: none; font-size: 13px; resize: vertical; transition: border 0.3s; }
-        textarea:focus { border-color: #3498db; }
+        .container textarea { width: 100%; height: 130px; padding: 12px; border: 2px solid #dfe6e9; border-radius: 8px; margin-bottom: 15px; outline: none; font-size: 13px; resize: vertical; transition: border 0.3s; }
+        .container textarea:focus { border-color: #3498db; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        button { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.25s; }
-        button:hover { opacity: 0.88; transform: translateY(-1px); }
+        .container button { flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.25s; }
+        .container button:hover { opacity: 0.88; transform: translateY(-1px); }
         .btn-process { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
         .btn-excel   { background: linear-gradient(135deg, #27ae60, #1e8449); color: white; }
         .btn-clear   { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
@@ -32,9 +32,9 @@
             display: none; justify-content: center; margin-top: 16px;
         }
         .table-container { overflow-x: auto; margin-top: 20px; max-height: 640px; border: 1px solid #ddd; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1750px; }
-        th, td { border: 1px solid #d1d8e0; padding: 9px 10px; text-align: center; font-size: 13px; }
-        th { background: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; }
+        #resultTable { width: 100%; border-collapse: collapse; min-width: 1750px; }
+        .container th, .container td { border: 1px solid #d1d8e0; padding: 9px 10px; text-align: center; font-size: 13px; }
+        .container th { background: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; }
         th.orange-header { background: #e67e22 !important; }
         tbody tr:nth-child(even) td { background-color: #f8f9fa; }
         td.col-index { background: linear-gradient(135deg, #2c3e50, #34495e) !important; color: #f1c40f !important; font-weight: bold; font-size: 14px; min-width: 38px; }
@@ -78,7 +78,197 @@
         .bd-sep   { font-size: 22px; color: #7f8c8d; }
         .bd-total-cell { background: #0d1b2a !important; }
         .bd-total-cell .bd-val { font-size: 22px; color: #f1c40f !important; }
-    </style>
+    
+/* ===== أنماط قسم طلب السداد المعجل (نطاقها محصور جوه #settlementSection) ===== */
+#settlementSection * { box-sizing: border-box; }#settlementSection {
+    font-family: "Arial", "Tahoma", sans-serif;
+    color: #000;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 20px 10px;
+  }#settlementSection .page {
+    max-width: 800px;
+    margin: 0 auto;
+  }#settlementSection /* ===== Buttons / controls bar ===== */
+  .toolbar {
+    max-width: 800px;
+    margin: 0 auto 16px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }#settlementSection button {
+    font-family: inherit;
+    font-size: 15px;
+    padding: 10px 22px;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+    border-radius: 4px;
+  }#settlementSection button:hover { background: #000; color: #fff; }#settlementSection /* ===== Data entry form ===== */
+  #formView {
+    background: #fff;
+    border: 1px solid #000;
+    padding: 25px 30px;
+  }#settlementSection #formView h2 {
+    text-align: center;
+    font-size: 20px;
+    margin: 0 0 20px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+  }#settlementSection .field {
+    margin-bottom: 16px;
+  }#settlementSection .field label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }#settlementSection .field input, #settlementSection .field textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    padding: 8px 10px;
+    border: 1px solid #999;
+    border-radius: 3px;
+    background: #fff;
+    color: #000;
+  }#settlementSection .field textarea { resize: vertical; min-height: 50px; }#settlementSection .row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }#settlementSection .row3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }#settlementSection .section-label {
+    font-weight: bold;
+    font-size: 15px;
+    margin: 22px 0 10px;
+    padding-top: 14px;
+    border-top: 1px dashed #999;
+  }#settlementSection .hint {
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+  }#settlementSection .words-hint {
+    font-size: 13px;
+    color: #0056b3;
+    margin-top: 5px;
+    font-weight: bold;
+    min-height: 16px;
+  }#settlementSection .readonly-field input[readonly] {
+    background: #eee;
+  }#settlementSection /* ===== Printable report (styled like the original form) ===== */
+  #reportView {
+    display: none;
+  }#settlementSection #reportView .sheet {
+    background: #fff;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 25px 30px;
+    border: 1px solid #000;
+    line-height: 1.6;
+  }#settlementSection .header {
+    width: 100%;
+    border-bottom: 3px double #000;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: right;
+  }#settlementSection .header p { margin: 2px 0; font-size: 14px; white-space: nowrap; }#settlementSection .header .underline { text-decoration: underline; }#settlementSection .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 60px;
+    margin: 2px 0;
+    font-size: 14px;
+  }#settlementSection .header-row span { white-space: nowrap; }#settlementSection h1 {
+    text-align: center;
+    font-size: 22px;
+    text-decoration: underline double;
+    margin: 10px 0 20px;
+  }#settlementSection .to-line { font-weight: bold; font-size: 17px; margin-bottom: 10px; }#settlementSection .greeting { font-weight: bold; font-size: 16px; margin-bottom: 14px; }#settlementSection #reportView p { margin: 10px 0; font-size: 15px; text-align: justify; }#settlementSection .fill-value {
+    border-bottom: 1px dotted #000;
+    display: inline-block;
+    min-width: 30px;
+    padding: 0 4px;
+    font-weight: bold;
+  }#settlementSection ul.notes { list-style: disc; padding-inline-start: 22px; margin: 12px 0; }#settlementSection ul.notes li { font-size: 15px; margin: 8px 0; }#settlementSection .declaration { text-align: center; font-weight: bold; font-size: 16px; margin: 16px 0 6px; }#settlementSection .attachment {
+    font-size: 14px;
+    border-top: 2px solid #000;
+    border-bottom: 3px double #000;
+    padding: 6px 0;
+    margin-bottom: 20px;
+  }#settlementSection .office-section { margin-top: 10px; }#settlementSection .office-title { font-weight: bold; font-size: 15px; margin-bottom: 12px; }#settlementSection table.office-table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }#settlementSection table.office-table td {
+    border: 1px solid #000;
+    padding: 8px 4px;
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }#settlementSection table.office-table td.fill-cell {
+    min-height: 30px;
+    font-weight: bold;
+    padding: 10px 5px;
+  }#settlementSection table.office-table td.fill-cell .cell-words {
+    display: block;
+    font-size: 10px;
+    font-weight: normal;
+    margin-top: 4px;
+    color: #333;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+  }#settlementSection .ack { font-size: 15px; text-align: justify; margin: 14px 0; }#settlementSection .sign-block { margin-top: 10px; }#settlementSection .sign-block p { margin: 6px 0; }#settlementSection .sign-title { font-weight: bold; }#settlementSection .witness-block {
+    margin-top: 40px;
+    padding-top: 15px;
+    border-top: 1px solid #000;
+  }#settlementSection .witness-block p { margin: 10px 0; }#settlementSection .witness-block .underline { text-decoration: underline; font-weight: bold; }
+
+  
+
+  
+
+@page { size: A4; margin: 8mm; }
+@media print {
+    body.printing-settlement { background: #fff; padding: 0; margin: 0; }
+    #settlementSection .toolbar { display: none !important; }
+    #settlementSection #reportView .sheet { border: none !important; padding: 0 !important; max-width: 100% !important; line-height: 1.35; }
+    #settlementSection .header { padding-bottom: 5px; margin-bottom: 10px; }
+    #settlementSection .header p, #settlementSection .header-row { font-size: 12px; margin: 1px 0; }
+    #settlementSection h1 { font-size: 18px; margin: 6px 0 10px; }
+    #settlementSection .to-line { font-size: 14px; margin-bottom: 5px; }
+    #settlementSection .greeting { font-size: 13px; margin-bottom: 6px; }
+    #settlementSection #reportView p { margin: 5px 0; font-size: 12.5px; }
+    #settlementSection .fill-value { min-width: 20px; }
+    #settlementSection ul.notes { margin: 6px 0; padding-inline-start: 18px; }
+    #settlementSection ul.notes li { font-size: 12.5px; margin: 4px 0; }
+    #settlementSection .declaration { font-size: 13px; margin: 8px 0 4px; }
+    #settlementSection .attachment { font-size: 11px; padding: 4px 0; margin-bottom: 10px; }
+    #settlementSection .office-section { margin-top: 4px; }
+    #settlementSection .office-title { font-size: 12px; margin-bottom: 6px; }
+    #settlementSection table.office-table { margin-bottom: 8px !important; font-size: 10.5px !important; table-layout: fixed; width: 100%; max-width: 100%; }
+    #settlementSection table.office-table td { padding: 4px 3px !important; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
+    #settlementSection table.office-table td.fill-cell { padding: 5px 3px !important; }
+    #settlementSection table.office-table td.fill-cell .cell-words { font-size: 8.5px !important; margin-top: 2px; word-wrap: break-word; overflow-wrap: break-word; }
+    #settlementSection .ack { font-size: 11.5px; margin: 8px 0; }
+    #settlementSection .sign-block { margin-top: 4px; }
+    #settlementSection .sign-block p { margin: 3px 0; }
+    #settlementSection .witness-block { margin-top: 16px; padding-top: 8px; }
+    #settlementSection .witness-block p { margin: 4px 0; }
+  }
+        /* عزل الطباعة: لما نطبع من جوه قسم طلب السداد المعجل بس */
+        body.printing-settlement > .container,
+        body.printing-settlement > .container * { display: none !important; }
+        body.printing-settlement #settlementSection { display: block !important; }
+</style>
 </head>
 <body>
 <div class="container">
@@ -105,6 +295,502 @@
     <div class="disclaimer">&#x26A0;&#xFE0F; النظام تحت الاختبار والتعديل.. يرجى مراجعة النتائج بعناية قبل الاعتماد عليها.</div>
     <div class="footer-credit">Powered by <span>Loans &amp; Economic Empowerment IT Group</span></div>
 </div>
+
+<div id="settlementSection" style="display:none;">
+
+
+  <div style="max-width:800px; margin:0 auto 10px; display:flex; justify-content:flex-end;">
+    <button type="button" onclick="closeSettlementSection()" style="background:#7f8c8d;">&#x2715; إغلاق</button>
+  </div>
+
+  <div class="toolbar" id="formToolbar">
+    <button type="button" onclick="generateReport()">إنشاء التقرير</button>
+  </div>
+
+  <!-- ============ DATA ENTRY FORM ============ -->
+  <div class="page" id="formView">
+    <h2>بيانات طلب السداد المعجل</h2>
+
+    <div class="field">
+      <label>اسم المكتب</label>
+      <input type="text" id="officeName" placeholder="اسم مكتب الجمعية">
+    </div>
+
+    <div class="field">
+      <label>اسم العميل</label>
+      <input type="text" id="clientName" placeholder="اسم العميل بالكامل">
+    </div>
+
+    <div class="field">
+      <label>مبلغ التمويل الذى تم الحصول عليه</label>
+      <input type="number" id="loanAmount" placeholder="مثال: 20000" oninput="updateWordHint('loanAmount','loanAmountWords')">
+      <div class="words-hint" id="loanAmountWords"></div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>مدة السداد (بالشهور)</label>
+        <input type="number" id="months" placeholder="مثال: 12">
+      </div>
+      <div class="field">
+        <label>قيمة القسط الشهرى</label>
+        <input type="number" id="installment" placeholder="مثال: 1700" oninput="updateWordHint('installment','installmentWords')">
+        <div class="words-hint" id="installmentWords"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>سبب طلب السداد المعجل (يذكر تفصيليا)</label>
+      <textarea id="reason" placeholder="اكتب السبب هنا"></textarea>
+    </div>
+
+    <div class="field">
+      <label>مصدر الاموال</label>
+      <input type="text" id="fundSource" placeholder="مصدر الاموال">
+    </div>
+
+    <div class="section-label">تملأ بواسطة موظف جمعية كاريتاس مصر</div>
+
+    <div class="field">
+      <label>الكود</label>
+      <input type="text" id="clientCode" placeholder="كود العميل">
+    </div>
+
+    <div class="row3">
+      <div class="field">
+        <label>المبلغ المطلوب سداده (اصل)</label>
+        <input type="number" id="principal" placeholder="0" oninput="calcTotals()">
+        <div class="words-hint" id="principalWords"></div>
+      </div>
+      <div class="field">
+        <label>عمولة السداد المعجل ( 5% )</label>
+        <input type="text" id="commission" oninput="updateWordHint('commission','commissionWords')">
+        <div class="hint">تُحسب تلقائيًا = 5% من المبلغ الأصلى، وتقدر تعدّلها يدويًا فى أي وقت</div>
+        <div class="words-hint" id="commissionWords"></div>
+      </div>
+      <div class="field">
+        <label>اجمالى المبلغ المطلوب سداده</label>
+        <input type="text" id="total" oninput="updateWordHint('total','totalWords')">
+        <div class="words-hint" id="totalWords"></div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>قيمة الفوائد المتبقية (المخصومة)</label>
+        <input type="number" id="remainingInterest" placeholder="0" oninput="calcTotals()">
+        <div class="words-hint" id="remainingInterestWords"></div>
+      </div>
+      <div class="field">
+        <label>اجمالى المبلغ المتبقى على العميل (الاصل + الفوائد)</label>
+        <input type="text" id="totalRemaining" oninput="updateWordHint('totalRemaining','totalRemainingWords')">
+        <div class="words-hint" id="totalRemainingWords"></div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>اسم الموظف (الشاهد على التوقيع)</label>
+        <input type="text" id="witnessName" placeholder="اسم الموظف">
+      </div>
+      <div class="field">
+        <label>التاريخ</label>
+        <input type="date" id="reportDate">
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PRINTABLE REPORT ============ -->
+  <div id="reportView">
+    <div class="toolbar">
+      <button type="button" onclick="printSettlementOnly()">طباعة / حفظ PDF</button>
+      <button type="button" onclick="saveAsWord()">حفظ كملف Word</button>
+      <button type="button" onclick="backToForm()">تعديل البيانات</button>
+    </div>
+
+    <div class="sheet">
+      <div class="header">
+        <div class="header-row">
+          <span>جمعية كاريتاس – مصر ( مكتب <span id="out_officeName">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> )</span>
+          <span>برنامج الاقراض و التمكين الاقتصادى</span>
+        </div>
+        <p>مسجلة برقم 1150 لسنه 1967</p>
+        <p class="underline">المرخصة من هيئة الرقابة المالية برقم 1373</p>
+      </div>
+
+      <h1>طلب سداد معجل</h1>
+
+      <div class="to-line">السادة جمعية كاريتاس مصر</div>
+      <div class="greeting">تحية طيبة و بعد,,,,</div>
+
+      <p>مقدمه لسيادتكم العميل / <span class="fill-value" id="out_clientName">&nbsp;</span></p>
+
+      <p>حيث اننى قد حصلت على تمويل من الجمعية مبلغ <span class="fill-value" id="out_loanAmount">&nbsp;</span></p>
+
+      <p>على أن يسدد على مدة <span class="fill-value" id="out_months">&nbsp;</span> شهر بواقع قسط شهرى بقيمة <span class="fill-value" id="out_installment">&nbsp;</span></p>
+
+      <p>اجمالى المبلغ المتبقى على العميل : <span class="fill-value" id="out_totalRemaining">&nbsp;</span></p>
+
+      <p>وحيث أننى ارغب فى سداد باقى الأقساط المتبقية على وتسوية حسابى لدى الجمعية لذا نرجو من سيادتكم الموافقة على سداد معجل لباقى الاقساط مع إلزامى بسداد المصاريف اللازمة لذلك .</p>
+
+      <ul class="notes">
+        <li>سبب طلب السداد المعجل : ( يذكر تفصيليا ) <span class="fill-value" id="out_reason">&nbsp;</span></li>
+        <li>مصدر الاموال : <span class="fill-value" id="out_fundSource">&nbsp;</span></li>
+      </ul>
+
+      <div class="declaration">و هذا اقرار منى بذلك</div>
+
+      <div class="attachment">- &nbsp; مرفق صورة من الرقم القومى</div>
+
+      <div class="office-section">
+        <div class="office-title">تملأ بواسطة موظف جمعية كاريتاس مصر</div>
+
+        <table class="office-table">
+          <tr>
+            <td>اسم العميل</td>
+            <td>الكود</td>
+          </tr>
+          <tr>
+            <td class="fill-cell" id="out_clientName2">&nbsp;</td>
+            <td class="fill-cell" id="out_clientCode">&nbsp;</td>
+          </tr>
+        </table>
+
+        <table class="office-table">
+          <tr>
+            <td>المبلغ المطلوب سداده اصل</td>
+            <td>قيمة الفوائد المخصومة</td>
+            <td>عمولة السداد المعجل ( 5% )</td>
+            <td>اجمالى المبلغ المطلوب سداده</td>
+          </tr>
+          <tr>
+            <td class="fill-cell"><span id="out_principal">&nbsp;</span><span class="cell-words" id="out_principalWords"></span></td>
+            <td class="fill-cell"><span id="out_remainingInterest">&nbsp;</span><span class="cell-words" id="out_remainingInterestWords"></span></td>
+            <td class="fill-cell"><span id="out_commission">&nbsp;</span><span class="cell-words" id="out_commissionWords"></span></td>
+            <td class="fill-cell"><span id="out_total">&nbsp;</span><span class="cell-words" id="out_totalWords"></span></td>
+          </tr>
+        </table>
+
+        <p class="ack">
+          اقر انا / اننى قد اطلعت على المبالغ المطلوب سدادها و قيمة السداد المعجل المطلوبة منى و على معرفه بقيمة العمولة ( 5% ) المراد سدادها لاتمام سداد التمويل و هذا اقرار منى بذلك
+        </p>
+
+        <div class="sign-block">
+          <p class="sign-title">توقيع العميل</p>
+          <p>الاسم: <span class="fill-value" id="out_clientName3">&nbsp;</span></p>
+          <p>التوقيع: <span class="fill-value">&nbsp;</span></p>
+        </div>
+
+        <div class="witness-block">
+          <p><span class="underline">تم توقيع العميل امامى انا</span> : &nbsp; الاسم : <span class="fill-value" id="out_witnessName">&nbsp;</span></p>
+          <p>التوقيع: <span class="fill-value">&nbsp;</span></p>
+          <p>التاريخ : <span class="fill-value" id="out_date">&nbsp;</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function formatAr(v) {
+    const n = parseFloat(v);
+    if (v === '' || v === null || v === undefined || isNaN(n)) return '\u00A0';
+    return n.toLocaleString('en-US');
+  }
+
+  // ===== Number to Arabic words (adapted from the office's number-to-words tool) =====
+  function numberToArabicWords(vNumber) {
+    if (vNumber === '' || vNumber === null || vNumber === undefined || isNaN(vNumber)) return '';
+    const number = parseFloat(vNumber);
+    if (number === 0) return '';
+
+    const units = [
+      "", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة", "ثمانية", "تسعة",
+      "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر", "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر", "تسعة عشر"
+    ];
+    const tens = ["", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون", "سبعون", "ثمانون", "تسعون"];
+    const hundreds = ["", "مائة", "مائتان", "ثلاثمائة", "أربعمائة", "خمسمائة", "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"];
+
+    const convert = (num) => {
+      let result = "";
+      let n = parseInt(num, 10);
+      const h = Math.floor(n / 100);
+      if (h > 0) result += hundreds[h];
+      n %= 100;
+      if (n > 0) {
+        if (h > 0) result += " و ";
+        if (n < 20) {
+          result += units[n];
+        } else {
+          const u = n % 10;
+          const t = Math.floor(n / 10);
+          if (u > 0) result += units[u] + " و ";
+          result += tens[t];
+        }
+      }
+      return result;
+    };
+
+    let parts = [];
+    let integerPart = Math.floor(number);
+    let decimalPart = Math.round((number - integerPart) * 100);
+
+    let i = 0;
+    while (integerPart > 0) {
+      const chunk = integerPart % 1000;
+      if (chunk > 0) {
+        let chunkText = convert(chunk);
+        if (i === 1) {
+          if (chunk === 1) chunkText = "ألف";
+          else if (chunk === 2) chunkText = "ألفان";
+          else if (chunk >= 3 && chunk <= 10) chunkText += " آلاف";
+          else chunkText += " ألف";
+        } else if (i === 2) {
+          if (chunk === 1) chunkText = "مليون";
+          else if (chunk === 2) chunkText = "مليونان";
+          else if (chunk >= 3 && chunk <= 10) chunkText += " ملايين";
+          else chunkText += " مليون";
+        } else if (i === 3) {
+          if (chunk === 1) chunkText = "مليار";
+          else if (chunk === 2) chunkText = "ملياران";
+          else if (chunk >= 3 && chunk <= 10) chunkText += " مليارات";
+          else chunkText += " مليار";
+        }
+        parts.unshift(chunkText);
+      }
+      integerPart = Math.floor(integerPart / 1000);
+      i++;
+    }
+
+    let finalResult = parts.join(" و ");
+    if (finalResult !== "") finalResult += " جنيهًا فقط لا غير";
+
+    if (decimalPart > 0) {
+      let decimalText = convert(decimalPart);
+      if (decimalText !== "") {
+        if (finalResult !== "") finalResult += " و ";
+        finalResult += decimalText + " قرشًا";
+      }
+    }
+    return finalResult;
+  }
+
+  function updateWordHint(inputId, hintId) {
+    const v = document.getElementById(inputId).value;
+    document.getElementById(hintId).textContent = numberToArabicWords(v);
+  }
+
+  function calcTotals() {
+    const raw = parseFloat(document.getElementById('principal').value);
+    const principal = isNaN(raw) ? 0 : raw;
+    const commission = Math.round(principal * 0.05);
+    const total = Math.round(principal + commission);
+    document.getElementById('commission').value = commission ? commission.toLocaleString('en-US') : '';
+    document.getElementById('total').value = total ? total.toLocaleString('en-US') : '';
+    document.getElementById('principalWords').textContent = numberToArabicWords(principal);
+    document.getElementById('commissionWords').textContent = numberToArabicWords(commission);
+    document.getElementById('totalWords').textContent = numberToArabicWords(total);
+
+    const rawInterest = parseFloat(document.getElementById('remainingInterest').value);
+    const remainingInterest = isNaN(rawInterest) ? 0 : rawInterest;
+    const totalRemaining = Math.round(principal + remainingInterest);
+    document.getElementById('remainingInterestWords').textContent = numberToArabicWords(remainingInterest);
+    document.getElementById('totalRemaining').value = totalRemaining ? totalRemaining.toLocaleString('en-US') : '';
+    document.getElementById('totalRemainingWords').textContent = numberToArabicWords(totalRemaining);
+  }
+
+  function val(id) {
+    const v = document.getElementById(id).value;
+    return v && v.trim() !== '' ? v : '\u00A0';
+  }
+
+  function formattedDate() {
+    const d = document.getElementById('reportDate').value;
+    if (!d) return '\u00A0';
+    const [y, m, day] = d.split('-');
+    return `${day}/${m}/${y}`;
+  }
+
+  function generateReport() {
+    document.getElementById('out_officeName').textContent = val('officeName');
+    document.getElementById('out_clientName').textContent = val('clientName');
+    document.getElementById('out_clientName2').textContent = val('clientName');
+    document.getElementById('out_clientName3').textContent = val('clientName');
+
+    const loanAmount = document.getElementById('loanAmount').value;
+    document.getElementById('out_loanAmount').textContent = formatAr(loanAmount) +
+      (numberToArabicWords(loanAmount) ? ' ( ' + numberToArabicWords(loanAmount) + ' )' : '');
+
+    document.getElementById('out_months').textContent = formatAr(document.getElementById('months').value);
+
+    const installment = document.getElementById('installment').value;
+    document.getElementById('out_installment').textContent = formatAr(installment) +
+      (numberToArabicWords(installment) ? ' ( ' + numberToArabicWords(installment) + ' )' : '');
+
+    document.getElementById('out_reason').textContent = val('reason');
+    document.getElementById('out_fundSource').textContent = val('fundSource');
+    document.getElementById('out_clientCode').textContent = val('clientCode');
+
+    const principal = document.getElementById('principal').value;
+    document.getElementById('out_principal').textContent = formatAr(principal);
+    document.getElementById('out_principalWords').textContent = numberToArabicWords(principal);
+
+    document.getElementById('out_commission').textContent = document.getElementById('commission').value || '\u00A0';
+    document.getElementById('out_commissionWords').textContent = document.getElementById('commissionWords').textContent;
+
+    document.getElementById('out_total').textContent = document.getElementById('total').value || '\u00A0';
+    document.getElementById('out_totalWords').textContent = document.getElementById('totalWords').textContent;
+
+    const remainingInterest = document.getElementById('remainingInterest').value;
+    document.getElementById('out_remainingInterest').textContent = formatAr(remainingInterest);
+    document.getElementById('out_remainingInterestWords').textContent = document.getElementById('remainingInterestWords').textContent;
+
+    const totalRemaining = document.getElementById('totalRemaining').value;
+    document.getElementById('out_totalRemaining').textContent = totalRemaining
+      ? totalRemaining + (document.getElementById('totalRemainingWords').textContent ? ' ( ' + document.getElementById('totalRemainingWords').textContent + ' )' : '')
+      : '\u00A0';
+
+    document.getElementById('out_witnessName').textContent = val('witnessName');
+    document.getElementById('out_date').textContent = formattedDate();
+
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('formToolbar').style.display = 'none';
+    document.getElementById('reportView').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+
+  function backToForm() {
+    document.getElementById('reportView').style.display = 'none';
+    document.getElementById('formView').style.display = 'block';
+    document.getElementById('formToolbar').style.display = 'flex';
+    window.scrollTo(0, 0);
+  }
+
+  function saveAsWord() {
+    const sheetHtml = document.querySelector('#reportView .sheet').innerHTML;
+    const wordStyles = `
+      @page Section1 {
+        size: 21cm 29.7cm;
+        margin: 1cm 1.3cm 1cm 1.3cm;
+        mso-header-margin: .3in;
+        mso-footer-margin: .3in;
+      }
+      div.Section1 { page: Section1; }
+      body { font-family: Arial, Tahoma, sans-serif; direction: rtl; font-size: 12px; line-height: 1.3; }
+      .header { border-bottom: 3px double #000; padding-bottom: 4px; margin-bottom: 8px; font-weight: bold; }
+      .header-row { width: 100%; }
+      .header-row span:first-child { float: right; }
+      .header-row span:last-child { float: left; }
+      .header p { margin: 1px 0; font-size: 11px; clear: both; }
+      .header .underline { text-decoration: underline; }
+      h1 { text-align: center; font-size: 16px; text-decoration: underline; margin: 6px 0 8px; }
+      .to-line { font-weight: bold; font-size: 13px; margin-bottom: 4px; }
+      .greeting { font-weight: bold; font-size: 12px; margin-bottom: 5px; }
+      p { margin: 4px 0; font-size: 11.5px; }
+      .fill-value { border-bottom: 1px dotted #000; font-weight: bold; padding: 0 4px; }
+      ul.notes { margin: 5px 0; padding-inline-start: 18px; }
+      ul.notes li { font-size: 11.5px; margin: 3px 0; }
+      .declaration { text-align: center; font-weight: bold; font-size: 12px; margin: 6px 0 3px; }
+      .attachment { font-size: 10.5px; border-top: 2px solid #000; border-bottom: 3px double #000; padding: 3px 0; margin-bottom: 8px; }
+      .office-title { font-weight: bold; font-size: 11.5px; margin-bottom: 5px; }
+      table.office-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 6px; font-size: 10px; }
+      table.office-table td { border: 1px solid #000; padding: 4px 3px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; }
+      .cell-words { display: block; font-size: 8px; font-weight: normal; margin-top: 2px; color: #333; word-wrap: break-word; }
+      .ack { font-size: 10.5px; margin: 6px 0; }
+      .sign-block { margin-top: 3px; }
+      .sign-block p { margin: 2px 0; }
+      .sign-title { font-weight: bold; }
+      .witness-block { margin-top: 14px; padding-top: 6px; border-top: 1px solid #000; }
+      .witness-block p { margin: 3px 0; }
+      .witness-block .underline { text-decoration: underline; font-weight: bold; }
+    `;
+    const html = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40" dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<title>طلب سداد معجل</title>
+<!--[if gte mso 9]>
+<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+<![endif]-->
+<style>${wordStyles}</style>
+</head>
+<body>
+<div class="Section1">${sheetHtml}</div>
+</body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const clientName = (document.getElementById('out_clientName').textContent || '').trim();
+    const fileName = 'طلب سداد معجل' + (clientName && clientName !== '\u00A0' ? ' - ' + clientName : '') + '.doc';
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /* ===== تعبئة البيانات (سواء جاية من رابط ?params أو من برنامج التصفية مباشرة فى نفس الصفحة) ===== */
+  function applySettlementData(data) {
+    const setVal = (id, value) => {
+      if (value === null || value === undefined || value === '') return;
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    };
+    setVal('officeName', data.officeName);
+    setVal('clientName', data.clientName);
+    setVal('loanAmount', data.loanAmount);
+    setVal('months', data.months);
+    setVal('installment', data.installment);
+    setVal('principal', data.principal);
+    setVal('remainingInterest', data.remainingInterest);
+
+    // تحديث الكتابة بالحروف تحت خانات المبالغ اللى اتملت
+    if (data.loanAmount !== undefined && data.loanAmount !== null && data.loanAmount !== '') {
+      updateWordHint('loanAmount', 'loanAmountWords');
+    }
+    if (data.installment !== undefined && data.installment !== null && data.installment !== '') {
+      updateWordHint('installment', 'installmentWords');
+    }
+
+    // العمولة (5%) والإجمالى والإجمالى المتبقى بتتحسب تلقائيًا من الأصل (أصول مستقبلية) + الفوائد المتبقية
+    calcTotals();
+  }
+
+  /* دعم إضافى: لو الصفحة اتفتحت لوحدها برابط فيه ?principal=...&loanAmount=... الخ */
+  function prefillFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    if (![...params.keys()].length) return;
+    applySettlementData({
+      officeName: params.get('officeName'),
+      clientName: params.get('clientName'),
+      loanAmount: params.get('loanAmount'),
+      months: params.get('months'),
+      installment: params.get('installment'),
+      principal: params.get('principal'),
+      remainingInterest: params.get('remainingInterest'),
+    });
+  }
+  prefillFromUrl();
+
+  /* طباعة قسم طلب السداد المعجل بس، من غير باقي محتوى الصفحة (لو الاتنين فى نفس الصفحة) */
+  function printSettlementOnly() {
+    document.body.classList.add('printing-settlement');
+    window.print();
+    setTimeout(() => document.body.classList.remove('printing-settlement'), 500);
+  }
+
+  function closeSettlementSection() {
+    const sec = document.getElementById('settlementSection');
+    if (sec) sec.style.display = 'none';
+  }
+</script>
+
+
+</div>
+
 <script>
 const today = new Date();
 document.getElementById('currentDateDisplay').innerText =
@@ -396,21 +1082,34 @@ function renderAll(mode) {
 }
 
 /* ===== فتح بيانات طلب السداد المعجل (اختيارى) =====
-   عدّل الرابط ده لو صفحة طلب السداد المعجل عندكم على مسار مختلف */
-const SETTLEMENT_FORM_URL = "https://caritasegypt349.github.io/Advance-Payment/";
-
+   بيفتح القسم تحت فى نفس الصفحة وياخد الأرقام مباشرة من نفس الصفحة، من غير ما ينقل لصفحة تانية. */
 function openSettlementRequest() {
     if (!lastClientS) { alert('محتاج تحلل بيانات فيها تصفية مطلوبة الأول'); return; }
     const S = lastClientS;
-    const params = new URLSearchParams({
-        principal: S.F,
-        commission: S.G,
-        total: S.H,
-        remainingInterest: S.waivedFees,
-        totalRemaining: S.F + S.waivedFees
-        /* ملحوظة: الغرامة مش بتتبعت لأن نموذج طلب السداد المعجل مفهوش خانة غرامة */
-    });
-    window.open(SETTLEMENT_FORM_URL + '?' + params.toString(), '_blank');
+    const section = document.getElementById('settlementSection');
+    section.style.display = 'block';
+
+    /* مبلغ التمويل الذى تم الحصول عليه = إجمالى عمود الأصل لكل الأقساط */
+    const loanAmountSum = parsedRows.reduce((sum, r) => sum + r.principal, 0);
+
+    /* مدة السداد بالشهور = آخر رقم فى عمود "م" (عدد الأقساط الكلى) */
+    const lastM = parsedRows.length ? parseInt(parsedRows[parsedRows.length - 1].m, 10) : NaN;
+
+    /* قيمة القسط الشهرى = قيمة واحدة من عمود الإجمالي (مش مجموع العمود) */
+    const installmentSample = parsedRows.length ? Math.round(parsedRows[0].totalDue) : '';
+
+    if (typeof applySettlementData === 'function') {
+        applySettlementData({
+            loanAmount: Math.round(loanAmountSum),
+            months: isNaN(lastM) ? '' : lastM,
+            installment: installmentSample,
+            /* المبلغ المطلوب سداده (اصل) = الأصول المستقبلية فقط */
+            principal: S.fprin,
+            remainingInterest: S.waivedFees
+            /* ملحوظة: الغرامة مش بتتبعت لأن نموذج طلب السداد المعجل مفهوش خانة غرامة */
+        });
+    }
+    section.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function exportToExcel() {
