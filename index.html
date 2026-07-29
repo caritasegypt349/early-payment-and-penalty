@@ -68,6 +68,7 @@
         .badge-paid-late  { background:#fde8d8; color:#a04000; }
         .badge-not-due    { background:#eaf2ff; color:#154360; }
         .disclaimer { text-align: center; color: #e74c3c; font-weight: bold; margin-top: 20px; font-size: 13px; padding: 10px; border: 1px dashed #e74c3c; border-radius: 8px; background-color: #fff5f5; }
+        #skipWarning { text-align: right; color: #7d6608; font-weight: bold; margin: 10px 0; font-size: 13px; padding: 10px 14px; border: 1px solid #f1c40f; border-radius: 8px; background-color: #fdf6e3; line-height: 1.6; }
         .footer-credit { text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; border-top: 1px solid #eee; padding-top: 12px; }
         .footer-credit span { color: #3498db; font-weight: bold; }
         /* صف التفصيل */
@@ -288,6 +289,7 @@
         <button class="btn-excel"   onclick="exportToExcel()">&#x1F4E5; تصدير Excel</button>
         <button class="btn-clear"   onclick="clearAll()">&#x1F5D1;&#xFE0F; مسح البيانات</button>
     </div>
+    <div id="skipWarning" style="display:none;"></div>
     <div id="statsArea"></div>
     <div id="tableOutput" class="table-container"></div>
     <div class="settlement-bar" id="settlementBar">
@@ -816,11 +818,102 @@ function parseLine(line) {
     return { m:p[0], date:p[1], jsDate, principal, fees, totalDue, paid, delayDays, penalty, statusTxt:p[8]||'' };
 }
 
-/* ===== تحديد نوع السطر بناءً على التاريخ =====
+/* ===== محاولة استرجاع سطر "مقلوب" (ترتيب أعمدته اختلط) بدل تجاهله بالكامل =====
+   الطريقة: نصنّف كل رمز فى السطر حسب شكله (تاريخ / رقم مالى بفاصلة عشرية / كلمة حالة / رقم صحيح / نص)
+   من غير الاعتماد على موضعه، وبعدين نتأكد رياضيًا (أصل + مصاريف = إجمالى) قبل ما نقبل النتيجة.
+   ده أسلوب تقريبى (heuristic) — لو مش قادر يتأكد بثقة، بيرجع null وتفضل السياسة الآمنة (تجاهل + تنبيه). */
+function tryRecoverGarbledLine(line) {
+    const tokens = line.trim().split(/\s+/);
+    if (tokens.length < 9) return null;
+
+    const dateRe   = /^\d{4}\/\d{2}\/\d{2}$/;
+    const moneyRe  = /^-?[\d,]+\.\d{2}$/;
+    const intRe    = /^-?\d+$/;
+    const STATUS_WORDS = ['مسدد', 'متأخر', 'مبكر', 'يستحق'];
+
+    const dates = [], moneys = [], statusParts = [], intTokens = [];
+
+    for (const t of tokens) {
+        if (dateRe.test(t)) dates.push(t);
+        else if (moneyRe.test(t)) moneys.push(parseFloat(t.replace(/,/g, '')));
+        else if (STATUS_WORDS.some(w => t.includes(w))) statusParts.push(t);
+        else if (intRe.test(t)) intTokens.push(t);
+        // أى حاجة تانية (اسم قناة السداد، فراغات..) بنتجاهلها هنا عمدًا
+    }
+
+    // شروط الحد الأدنى للثقة: محتاجين 6 قيم مالية (3 أصل التزام + 3 مدفوع)، تاريخ واحد ع الأقل،
+    // كلمة حالة واحدة ع الأقل، ورقمين صحيحين ع الأقل (م + أيام التأخير)
+    if (moneys.length !== 6) return null;
+    if (dates.length < 1) return null;
+    if (statusParts.length < 1) return null;
+    if (intTokens.length < 2) return null;
+
+    // نحاول نلاقى تقسيمة لـ6 القيم لمجموعتين كل مجموعة فيها قيمة = مجموع القيمتين التانيين (أصل+مصاريف=إجمالى)
+    const eps = 0.5;
+    function combos3(n) {
+        const res = [];
+        for (let i = 0; i < n; i++)
+            for (let j = i + 1; j < n; j++)
+                for (let k = j + 1; k < n; k++)
+                    res.push([i, j, k]);
+        return res;
+    }
+    function findTotalIndex(idxs) {
+        const [a, b, c] = idxs;
+        const va = moneys[a], vb = moneys[b], vc = moneys[c];
+        if (Math.abs(va - (vb + vc)) < eps) return { total: a, others: [b, c] };
+        if (Math.abs(vb - (va + vc)) < eps) return { total: b, others: [a, c] };
+        if (Math.abs(vc - (va + vb)) < eps) return { total: c, others: [a, b] };
+        return null;
+    }
+
+    let match = null;
+    const all = [0, 1, 2, 3, 4, 5];
+    for (const g1 of combos3(6)) {
+        const g2 = all.filter(i => !g1.includes(i));
+        const r1 = findTotalIndex(g1);
+        if (!r1) continue;
+        const r2 = findTotalIndex(g2);
+        if (!r2) continue;
+        match = { r1, r2 };
+        break;
+    }
+    if (!match) return null; // مش قادرين نتأكد رياضيًا — أرفض الاسترجاع، أسلم نتجاهل السطر
+
+    const totalDue  = moneys[match.r1.total];
+    const paidTotal = moneys[match.r2.total];
+    const [oi1, oi2] = match.r1.others;
+    // فرضية: الأصل أكبر من المصاريف عادة فى هذا النوع من التمويل (تقريبى، لازم تُراجع)
+    const va = moneys[oi1], vb = moneys[oi2];
+    const principal = Math.max(va, vb);
+    const fees = Math.min(va, vb);
+
+    const dueDate = dates[0];
+    const dp = dueDate.split('/');
+    const jsDate = new Date(+dp[0], +dp[1] - 1, +dp[2]);
+    const statusTxt = statusParts.join(' ');
+
+    // بافتراض إن آخر رقم صحيح فى السطر هو "م" (زى الوضع الطبيعى) والباقى قبله أيام التأخير
+    const m = intTokens[intTokens.length - 1];
+    const delayDays = intTokens.length >= 2 ? (parseInt(intTokens[0], 10) || 0) : 0;
+
+    const penPerDay = delayDays > 0 ? totalDue * 0.01 : 0;
+    const penalty = Math.min(penPerDay * delayDays, fees);
+
+    return {
+        m, date: dueDate, jsDate,
+        principal, fees, totalDue, paid: paidTotal,
+        delayDays, penalty, statusTxt,
+        recovered: true
+    };
+}
+
+/* ===== تحديد نوع السطر بناءً على التاريخ فقط =====
    - jsDate < today  → PAST (مسدد) أو OVERDUE (غير مسدد)
    - أول قسط jsDate >= today → CURRENT (الدور عليه)
    - ما بعده → FUTURE
-*/
+   ملحوظة: تحديد "الاستحقاق" هنا بالتاريخ بس، حتى لو القسط ده كان مدفوع مقدمًا.
+   استبعاد القيمة المدفوعة من حساب مبلغ التصفية بيتم بعد كده فى computeLiquidation. */
 let _currentAssigned = false;
 function resetFlag() { _currentAssigned = false; }
 function getRowType(row) {
@@ -863,11 +956,40 @@ function processAll() {
     const input = document.getElementById('dataInput').value.trim();
     if (!input) { alert('الرجاء لصق البيانات أولاً'); return; }
     resetFlag();
-    const rows = input.split('\n').map(parseLine).filter(Boolean);
+    const lines = input.split('\n');
+    const rows = [];
+    const skippedLineNumbers = [];
+    const recoveredLineNumbers = [];
+    lines.forEach((line, i) => {
+        if (!line.trim()) return; // سطر فاضى، تجاهله من غير تنبيه
+        const parsed = parseLine(line);
+        if (parsed) { rows.push(parsed); return; }
+        const recovered = tryRecoverGarbledLine(line);
+        if (recovered) { rows.push(recovered); recoveredLineNumbers.push(i + 1); return; }
+        skippedLineNumbers.push(i + 1);
+    });
     if (!rows.length) { alert('لم يتم التعرف على بيانات صحيحة'); return; }
     rows.forEach(r => { r.rowType = getRowType(r); });
     parsedRows = rows;
     renderAll(currentMode);
+
+    const warnBox = document.getElementById('skipWarning');
+    const msgs = [];
+    if (recoveredLineNumbers.length) {
+        msgs.push('🔧 تم استرجاع ' + recoveredLineNumbers.length + ' سطر كان ترتيب أعمدته مختلط (رقم السطر: ' +
+            recoveredLineNumbers.join('، ') + ') والحساب المبدئى منطقى، لكنها عملية تقريبية — يُرجى مراجعة هذه الصفوف بعنايه فى الجدول.');
+    }
+    if (skippedLineNumbers.length) {
+        msgs.push('⚠️ تعذّرت قراءة ' + skippedLineNumbers.length + ' سطر (مقلوب/ناقص/مش بالشكل المتوقع) ولم نقدر نتأكد من ترتيب أعمدته، فتم تجاهله من الحساب — رقم السطر: ' +
+            skippedLineNumbers.join('، ') + '. يفضّل تراجع السطور دى يدويًا فى برنامج المحصل.');
+    }
+    if (msgs.length) {
+        warnBox.style.display = 'block';
+        warnBox.innerHTML = msgs.join('<br>');
+    } else {
+        warnBox.style.display = 'none';
+        warnBox.textContent = '';
+    }
 }
 
 /* ===== حساب التصفية لوضع معيّن (عميل / شركة تأمين) بدون إعادة تحليل النص ===== */
@@ -891,21 +1013,35 @@ function computeLiquidation(rows, mode) {
 
         let F=null, G=null, H=null, I=null, fprin=0, overdue=0, waivedFees=0;
         if (idx >= startIdx) {
-            F = row.totalDue;
-            for (let i=idx+1; i<rows.length; i++) { F += rows[i].principal; fprin += rows[i].principal; waivedFees += rows[i].fees; }
+            /* الجزء المتبقى (الغير مسدد) من القسط الحالى نفسه — لو اتسدد كله أو جزء منه مبكرًا، مبيتحسبش تانى */
+            const currentRemaining = Math.max(row.totalDue - row.paid, 0);
+            F = currentRemaining;
+
+            /* نفس الفكرة للأقساط المستقبلية: لو أى قسط مستقبلى اتسدد (كله أو جزء) مبكرًا، بنطرح الجزء المسدد
+               ده ونحسب بس الباقى (نسبيًا بين الأصل والمصاريف) */
+            for (let i=idx+1; i<rows.length; i++) {
+                const r = rows[i];
+                const remaining = Math.max(r.totalDue - r.paid, 0);
+                const ratio = r.totalDue > 0 ? remaining / r.totalDue : 0;
+                const remPrincipal = r.principal * ratio;
+                const remFees = r.fees * ratio;
+                F += remPrincipal;
+                fprin += remPrincipal;
+                waivedFees += remFees;
+            }
             for (let j=0; j<idx; j++) {
                 const d = rows[j].totalDue - rows[j].paid;
                 if (d>0) { F += d; overdue += d; }
             }
             G = isInsurance ? 0 : Math.round(fprin * 0.05);
             H = Math.round(F + G);
-            I = Math.round(H + accPen - row.paid);
+            I = Math.round(H + accPen);
 
             if (row.rowType === 'CURRENT' && S === null) {
                 S = { I, H, G, F: Math.round(F),
                       penalties: Math.round(accPen),
                       overdue:   Math.round(overdue),
-                      current:   Math.round(row.totalDue),
+                      current:   Math.round(currentRemaining),
                       fprin:     Math.round(fprin),
                       waivedFees: Math.round(waivedFees) };
             }
@@ -1125,6 +1261,8 @@ function clearAll() {
     document.getElementById('tableOutput').innerHTML = '';
     document.getElementById('statsArea').innerHTML = '';
     document.getElementById('settlementBar').style.display = 'none';
+    document.getElementById('skipWarning').style.display = 'none';
+    document.getElementById('skipWarning').textContent = '';
     parsedRows = [];
     lastClientS = null;
 }
