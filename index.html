@@ -398,7 +398,7 @@
       </div>
       <div class="field">
         <label>التاريخ</label>
-        <input type="date" id="reportDate">
+        <input type="text" id="reportDate" placeholder="يوم/شهر/سنة  مثال: 28/07/2026">
       </div>
     </div>
   </div>
@@ -607,10 +607,17 @@
   }
 
   function formattedDate() {
-    const d = document.getElementById('reportDate').value;
+    const d = document.getElementById('reportDate').value.trim();
     if (!d) return '\u00A0';
-    const [y, m, day] = d.split('-');
-    return `${day}/${m}/${y}`;
+    // بنقبل يوم/شهر/سنة بأى فاصل (/ أو - أو مسافة) ونوحّدها لصورة يوم/شهر/سنة
+    const parts = d.split(/[\/\-\s]+/).filter(Boolean);
+    if (parts.length === 3) {
+      const [a, b, c] = parts;
+      // لو أول جزء اتكتب بصيغة سنة (4 أرقام) بالغلط، رجّعها يوم/شهر/سنة
+      if (a.length === 4) return `${c}/${b}/${a}`;
+      return `${a}/${b}/${c}`;
+    }
+    return d; // مقدرناش نفهم الصيغة، نعرض زى ما اتكتب
   }
 
   function generateReport() {
